@@ -1,679 +1,714 @@
- 1000 *--------------------------------
- 1010 *  SAVE IRQ.CODE
- 1020 *--------------------------------
- 1030 IRQ1	 LDA #BLACK
- 1040		 STA BACKGROUND.COLOR0
- 1050		 JSR SETUP.HIRES
- 1060		 INC SEED
- 1070		 LDA SPRITE.SCOLIDE
- 1080		 STA SPRITE.COLLISION	READ BELOW GROUND COLLISIONS
- 1090		 LDA SPRITE.BCOLIDE
- 1100		 STA BUCHIT
- 1110		 ORA CHOP.BACK.COLL
- 1120		 STA CHOP.BACK.COLL
- 1130		 LDA #$00
- 1140		 STA CHOP.DIR
- 1150		 LDA #$02
- 1160		 STA BOMB.SPEED
- 1170		 JSR CHECK.ROT
- 1180		 JSR DO.BOMBS
- 1190 *--------------------------------
- 1200 * RESTORE MULTI USED SPRITES
- 1210 *--------------------------------
- 1220 SP.UPDATE  LDA #$24
- 1230		 STA SPRITE.POINTER+3
- 1240		 LDY SUNPH
- 1250		 LDA SUN.TABLE,Y
- 1260		 STA SPRITE.POINTER+4
- 1270		 LDA #WHITE
- 1280		 STA SPRITE.COLOR+3
- 1290		 LDA #YELLOW
- 1300		 STA SPRITE.COLOR+4
- 1310		 LDA #$18
- 1320		 STA SPRITE.PRIORITY
- 1330 *--------------------------------
- 1340 UPDATE.YPOS LDX #$00
- 1350 .1	  TXA
- 1360		  ASL
- 1370		  TAY
- 1380		  LDA CHOP.Y,X
- 1390		  STA SPRITE.YPOS,Y
- 1400		  INX
- 1410		  CPX #$06
- 1420		  BNE .1
- 1430 *--------------------------------
- 1440 UPDATE.XPOS LDY #$00
- 1450 .2	  TYA
- 1460		  ASL
- 1470		  TAX
- 1480		  LDA CHOP.X,X
- 1490		  STA SPRITE.XPOS,X
- 1500		  LDA CHOP.XMSB,X
- 1510		  BEQ .3
- 1520		  LDA SPRITE.XMSB
- 1530		  ORA SPRITE.MASK,Y
- 1540		  STA SPRITE.XMSB
- 1550		  JMP .4
- 1560 *--------------------------------
- 1570 .3	  LDA SPRITE.MASK,Y
- 1580		  EOR #$FF
- 1590		  AND SPRITE.XMSB
- 1600		  STA SPRITE.XMSB
- 1610 .4	  INY
- 1620		  CPY #$06
- 1630		  BNE .2
- 1640 *--------------------------------
- 1650 DO.TIME	 LDX #$09      RESET ALL TIMERS
- 1660 .2	 LDA TIMER1,X
- 1670		 BEQ .1
- 1680		 DEC TIMER1,X
- 1690 .1	 DEX
- 1700		 BPL .2
- 1710 *--------------------------------
- 1720 CHECK.COLL LDA CHOP.Y
- 1730		 SEC
- 1740		 SBC #$29
- 1750		 STA IRQ.PLOTY
- 1760		 STA CHOP.YSC
- 1770 *--------------------------------
- 1780		 LDA CHOP.X
- 1790		 SEC
- 1800		 SBC #$13
- 1810		 STA IRQ.TEMP1
- 1820		 LDA CHOP.XMSB
- 1830		 SBC #$00
- 1840		 LSR
- 1850		 ROR IRQ.TEMP1
- 1860		 LDA IRQ.TEMP1
- 1870		 STA IRQ.PLOTX
- 1880		 STA CHOP.XSC
- 1890 *--------------------------------
- 1900		 JSR IRQ.PLOTCL
- 1910		 LDA IRQ.PLOTX
- 1920		 AND #$03
- 1930		 TAX
- 1940 *--------------------------------
- 1950 * CHECK IF HITTING PAD
- 1960 *--------------------------------
- 1970		 LDA CHOP.XMSB
- 1980		 BNE START.COLL
- 1990		 LDA IRQ.PLOTY
- 2000		 SEC
- 2010		 SBC #$08
- 2020		 CMP INILVL
- 2030		 BCS START.COLL
- 2040		 LDA IRQ.PLOTY
- 2050		 CMP MOUNTAIN.TOP
- 2060		 BCC START.COLL
- 2070 *--------------------------------
- 2080		 LDA CHOP.Y
- 2090		 CMP INICHT
- 2100		 BEQ START.COLL
- 2110		 BCC START.COLL
- 2120		 LDA CHOP.X
- 2130		 CMP #$35
- 2140		 BCS START.COLL
- 2150 *--------------------------------
- 2160		 LDA #$01     HIT PAD
- 2170		 STA HIT0
- 2180 *--------------------------------
- 2190 START.COLL LDA IRQ.PLOTY
- 2200		 CMP INILVL	ABOVE GROUND?
- 2210		 BCC .33	YES
- 2220 *--------------------------------
- 2230 * UNDER GROUND CHECKS
- 2240 * DO SOFTWARE COLLISION
- 2250 *--------------------------------
- 2260		 LDY #$00
- 2270		 LDA BOMB.MASK,X
- 2280		 EOR #$FF
- 2290		 AND (IRQ.LO),Y
- 2300		 CMP WATER.COLOR,X
- 2310		 BNE .3
- 2320 *--------------------------------
- 2330		 LDA #$01
- 2340		 STA HIT0	  WE HIT WATER
- 2350 *--------------------------------
- 2360 .3	 CMP DIRT.COLOR,X
- 2370		 BNE .34
- 2380 *--------------------------------
- 2390		 LDA #$01
- 2400		 STA HIT0
- 2410 *--------------------------------
- 2420 * UNDERGROUND HARDWARE COLLISION
- 2430 *--------------------------------
- 2440 .34	 LDA CHOP.BACK.COLL
- 2450		 AND #$01
- 2460		 BEQ NO.COLL
- 2470 *--------------------------------
- 2480		 LDA INILVL
- 2490		 CLC
- 2500		 ADC #$09
- 2510		 CMP IRQ.PLOTY
- 2520		 BCC .28
- 2530 *--------------------------------
- 2540		 JMP NO.COLL
- 2550 *--------------------------------
- 2560 * CHECK ABOVE GROUND
- 2570 * HARDWARE COLLISION
- 2580 *--------------------------------
- 2590 .33	 LDA CHOP.BACK.COLL CHOPPER TO BACKGROUND
- 2600		 AND #$01	    COPY COLLISION
- 2610		 BEQ NO.COLL
- 2620 *--------------------------------
- 2630		 LDA CHOP.XMSB	 MAKE SURE CHOP
- 2640		 BNE .2 	 IS ON LEFT SIDE
- 2650		 LDA CHOP.Y
- 2660		 CMP INICHT
- 2670		 BNE .2
- 2680		 LDA CHOP.X
- 2690		 CMP #$38      IF CHOP.X<$3D THEN
- 2700		 BCC .1        WE ARE OVER PAD
- 2710 *--------------------------------
- 2720 * SOFTWARE COLLISION FOR SMARTBOMB
- 2730 *--------------------------------
- 2740 .2	 LDA IRQ.PLOTY
- 2750		 STA IRQ.TEMP1
- 2760		 LDA CHOP.Y
- 2770		 SEC
- 2780		 SBC #$2F
- 2790		 STA IRQ.PLOTY
- 2800		 JSR IRQ.PLOTCL
- 2810 *--------------------------------
- 2820		 LDY #$00
- 2830		 LDA BOMB.MASK,X
- 2840		 EOR #$FF
- 2850		 AND (IRQ.LO),Y
- 2860		 CMP BOMB.SHAPE,X
- 2870		 BNE .22
- 2880 *--------------------------------
- 2890		 LDA INICHT
- 2900		 SEC
- 2910		 SBC #$02
- 2920		 CMP CHOP.Y
- 2930		 BEQ .22
- 2940		 LDA CHOP.X
- 2950		 CMP #$38
- 2960		 BCS .28
- 2970 *--------------------------------
- 2980 .22	 LDA IRQ.TEMP1
- 2990		 STA IRQ.PLOTY
- 3000		 LDA MOUNTAIN.TOP
- 3010		 CMP IRQ.PLOTY	IRQ.PLOTY<=TOP
- 3020		 BCC NO.COLL	NO
- 3030 *--------------------------------
- 3040 .28	 LDA #$01      WE MUST OF HIT
- 3050		 STA HIT0      GROUND
- 3060		 BNE NO.COLL
- 3070 *--------------------------------
- 3080 .1	 LDA #$01      TELL EVERYONE WE ARE
- 3090		 STA LANDFG    ON LANDING PAD
- 3100		 BNE DO.SUN
- 3110 *--------------------------------
- 3120 NO.COLL	 LDA #$00      WE ARE NOT
- 3130		 STA LANDFG    ON LANDING PAD
- 3140 *--------------------------------
- 3150 * CHECK FOR PAUSE
- 3160 *--------------------------------
- 3170 DO.SUN	 LDA PAUSE
- 3180		 BEQ .3
- 3190		 JMP MOD3
- 3200 *--------------------------------
- 3210 .3	 LDA SUN.TIM
- 3220		 BNE .1
- 3230		 LDA #$06
- 3240		 STA SUN.TIM
- 3250		 LDY SUNPH
- 3260		 LDA SUN.TABLE,Y
- 3270		 STA SPRITE.POINTER+4
- 3280		 INC SUNPH
- 3290		 LDA SUNPH
- 3300		 CMP #$06
- 3310		 BNE .1
- 3320		 LDA #$00
- 3330		 STA SUNPH
- 3340 *--------------------------------
- 3350 .1	 DEC SUN.TIM
- 3360		 LDA CHOP.TIM	  CHECK IF TIME TO DO
- 3370		 BEQ .2 	CHOPPER
- 3380 *--------------------------------
- 3390		 JMP DO.DIRT
- 3400 *--------------------------------
- 3410 .2	 LDA CHOP.SPEED   SET CHOPPER UPDATE
- 3420		 STA CHOP.TIM	  SPEED
- 3430		 LDX BODPH	    POINT TO THE
- 3440		 LDA CHOP.SHAPE,X   CHOPPER SHAPE THAT
- 3450		 STA SPRITE.POINTER WE WANT
- 3460		 LDA DEMO
- 3470		 BEQ MOVE.CHOP
- 3480 *--------------------------------
- 3490		 JMP MOD3
- 3500 *--------------------------------
- 3510 * MOVE CHOPPER
- 3520 *--------------------------------
- 3530 MOVE.CHOP  LDA INCUD
- 3540		 BEQ READ.ST
- 3550		 JMP DO.DIRT
- 3560 *--------------------------------
- 3570 READ.ST	 LDA STICK.TMP
- 3580		 ROR
- 3590		 BCS DO.DWN
- 3600 DO.UP	 PHA
- 3610		 LDA CHOP.Y
- 3620		 CMP #$3F
- 3630		 BEQ .1
- 3640		 DEC CHOP.Y
- 3650 .1	 PLA
- 3660 *--------------------------------
- 3670 DO.DWN	 ROR
- 3680		 BCS DO.LFT
- 3690		 PHA
- 3700		 LDA LANDFG  CHECK IF ON LANDING
- 3710		 BNE .1      PAD
- 3720		 LDA CHOP.Y
- 3730		 INC CHOP.Y
- 3740 .1	 PLA
- 3750 *--------------------------------
- 3760 DO.LFT	 ROR
- 3770		 BCS DO.RT
- 3780		 PHA
- 3790		 LDA #$02
- 3800		 STA CHOP.DIR
- 3810		 PLA
- 3820 *--------------------------------
- 3830 DO.RT	 ROR
- 3840		 BCS DO.CHOP
- 3850		 LDA #$01
- 3860		 STA CHOP.DIR
- 3870 *--------------------------------
- 3880 DO.CHOP	 LDA CHOP.DIR
- 3890		 CMP #$01
- 3900		 BEQ RIGHT
- 3910		 CMP #$02
- 3920		 BEQ LEFT
- 3930 *--------------------------------
- 3940		 JMP DO.DIRT
- 3950 *--------------------------------
- 3960 LEFT	 LDA BODPH
- 3970		 BEQ .11
- 3980 *--------------------------------
- 3990		 JMP DO.DIRT
- 4000 *--------------------------------
- 4010 .11	 LDA CHOP.XMSB
- 4020		 BNE .1
- 4030		 LDA CHOP.X
- 4040		 CMP #$1E
- 4050		 BEQ DO.DIRT
- 4060 .1	 LDA CHOP.X
- 4070		 SEC
- 4080		 SBC #$01
- 4090		 STA CHOP.X
- 4100		 BCS DO.DIRT
- 4110		 LDA #$00
- 4120		 STA CHOP.XMSB
- 4130		 BEQ DO.DIRT
- 4140 *--------------------------------
- 4150 RIGHT	 LDA BODPH
- 4160		 CMP #$04
- 4170		 BEQ .11
- 4180 *--------------------------------
- 4190		 JMP DO.DIRT
- 4200 *--------------------------------
- 4210 .11	 LDA CHOP.XMSB
- 4220		 BEQ .1
- 4230		 LDA CHOP.X
- 4240		 CMP #$2E
- 4250		 BEQ DO.DIRT
- 4260 .1	 LDA CHOP.X
- 4270		 CLC
- 4280		 ADC #$01
- 4290		 STA CHOP.X
- 4300		 BCC DO.DIRT
- 4310		 LDA #$01
- 4320		 STA CHOP.XMSB
- 4330 *--------------------------------
- 4340 *  START THE DIRT DROPPING
- 4350 *--------------------------------
- 4360 DO.DIRT	 DEC CHOP.TIM
- 4370		 LDX PLNDIR
- 4380		 LDY DROPWT    WAITING FOR DROP?
- 4390		 BEQ START.GUN	 NO
- 4400 *--------------------------------
- 4410		 LDA PLANE.X
- 4420		 SEC
- 4430		 SBC #$10
- 4440		 STA IRQ.TEMP1
- 4450		 LDA PLANE.XMSB
- 4460		 SBC #$00
- 4470		 LSR
- 4480		 ROR IRQ.TEMP1
- 4490		 LDA IRQ.TEMP1
- 4500		 CMP DRPCOL	 SAME AS DROP COLUMN?
- 4510		 BNE START.GUN	   NO
- 4520		 INC DROPGO	 DROP DIRT
- 4530 *--------------------------------
- 4540 START.GUN  LDA GUNFAL	 DROP GUN?
- 4550		 BEQ MOD3  NO
- 4560		 LDA PLANE.X
- 4570		 CMP GUN.X
- 4580		 BNE MOD3
- 4590		 INC GUNFGO    START GUN FALLING
- 4600		 LDA #50
- 4610		 STA GUN.Y     SHOW GUN ON SCREEN
- 4620 *--------------------------------
- 4630 MOD3	 LDA #$B0
- 4640		 LDX #IRQ1.2
- 4650		 LDY /IRQ1.2
- 4660		 STA RASTER
- 4670		 STX IRQLO
- 4680		 STY IRQHI
- 4690		 LDA #$81
- 4700		 STA VIC.IRQ
- 4710		 PLA
- 4720		 TAY
- 4730		 PLA
- 4740		 TAX
- 4750		 PLA
- 4760		 RTI
- 4770 *--------------------------------
- 4780 * RESTORE BACKGROUND COLOR
- 4790 * AT BASE OF MOUNTAINS
- 4800 *
- 4810 * 	IRQ1.2
- 4820 *--------------------------------
- 4830 IRQ1.2	 LDA #BLACK
- 4840 ONE	 LDX RASTER
- 4850 MOD4	 CPX #$B6
- 4860		 BCC ONE	     WAS BNE!
- 4870		 STA BACKGROUND.COLOR0
- 4880 *--------------------------------
- 4890 .11	 LDA DEMO    IN DEMO
- 4900		 BEQ .1      NO
- 4910 *--------------------------------
- 4920		 JMP DO.BLADES
- 4930 *--------------------------------
- 4940 .1	 LDA SPRITE.BCOLIDE
- 4950		 STA CHOP.BACK.COLL
- 4960		 LDA SPRITE.SCOLIDE    CLEAR COLLISION REGISTER
- 4970 *--------------------------------
- 4980		 LDA PRIZE.1		POINT TO THE BUCKS
- 4990		 STA SPRITE.POINTER+3
- 5000		 LDA PRIZE.2
- 5010		 STA SPRITE.POINTER+4
- 5020		 LDA PRIZE.3
- 5030		 STA SPRITE.POINTER+5
- 5040 *--------------------------------
- 5050		 LDA #$07
- 5060		 STA SPRITE.MULTI.COLOR
- 5070		 LDA #$00
- 5080		 STA SPRITE.PRIORITY
- 5090 *--------------------------------
- 5100		 LDA PRIZE.1C
- 5110		 STA SPRITE.COLOR+3
- 5120		 LDA PRIZE.2C
- 5130		 STA SPRITE.COLOR+4
- 5140		 LDA PRIZE.3C
- 5150		 STA SPRITE.COLOR+5
- 5160 *--------------------------------
- 5170 * POSITION BUCKS DURING INTERUPT
- 5180 *--------------------------------
- 5190		 LDY #$00
- 5200 .2	 TYA
- 5210		 ASL
- 5220		 TAX
- 5230		 LDA BUC1.X,X
- 5240		 STA SPRITE.XPOS+6,X
- 5250		 LDA BUC1.XMSB,X
- 5260		 BEQ .3
- 5270		 LDA SPRITE.XMSB
- 5280		 ORA SPRITE.MASK+3,Y
- 5290		 STA SPRITE.XMSB
- 5300		 JMP .4
- 5310 .3	 LDA SPRITE.MASK+3,Y
- 5320		 EOR #$FF
- 5330		 AND SPRITE.XMSB
- 5340		 STA SPRITE.XMSB
- 5350 .4	 INY
- 5360		 CPY #$04
- 5370		 BNE .2
- 5380 *--------------------------------
- 5390		 LDA BUC1.Y
- 5400		 STA SPRITE.YPOS+6
- 5410		 LDA BUC2.Y
- 5420		 STA SPRITE.YPOS+8
- 5430		 LDA BUC3.Y
- 5440		 STA SPRITE.YPOS+10
- 5450 *--------------------------------
- 5460 *  CHECK FOR PAUSE
- 5470 *--------------------------------
- 5480		 LDA PAUSE
- 5490		 BEQ DO.BLADES
- 5500		 JMP MOD
- 5510 *--------------------------------
- 5520 *  BLADE CODE
- 5530 *--------------------------------
- 5540 DO.BLADES  LDA BLADE.TIM
- 5550		 BNE SKIP.BLADE
- 5560		 LDA #$01
- 5570		 STA BLADE.TIM
- 5580 *--------------------------------
- 5590		 LDA #$81   VOICE 1 ON
- 5600		 STA $D404
- 5610 *--------------------------------
- 5620		 LDY BLDPH
- 5630		 LDA BLADE.TABLE,Y
- 5640		 TAX
- 5650		 LDY #$05
- 5660 .1	 LDA BLADE.SHAPE,X
- 5670		 STA SPRITE.MEMORY+09,Y
- 5680		 STA SPRITE.MEMORY+$40+09,Y
- 5690		 STA SPRITE.MEMORY+$80+09,Y
- 5700		 STA SPRITE.MEMORY+$C0+09,Y
- 5710		 STA SPRITE.MEMORY+$100+09,Y
- 5720		 DEX
- 5730		 DEY
- 5740		 BPL .1
- 5750		 INC BLDPH
- 5760		 LDA BLDPH
- 5770		 CMP #$0A
- 5780		 BNE SKIP.BLADE
- 5790 *--------------------------------
- 5800		 LDA $D404   VOICE 1 OFF
- 5810		 AND #$FE
- 5820		 STA $D404
- 5830 *--------------------------------
- 5840		 LDA #$00
- 5850		 STA BLDPH
- 5860 *--------------------------------
- 5870 SKIP.BLADE DEC BLADE.TIM
- 5880 *--------------------------------
- 5890 DO.PLANE	 LDA TRANSIT
- 5900		 BEQ MOD
- 5910 *--------------------------------
- 5920		 LDA #$01
- 5930		 STA PLANE.TIM
- 5940 *--------------------------------
- 5950 PLANE.LUP  LDA PLNDIR
- 5960		 BNE .1
- 5970 *--------------------------------
- 5980		 LDA PLANE.XMSB
- 5990		 BNE .3
- 6000		 LDA PLANE.X
- 6010		 CMP #$02
- 6020		 BEQ .5
- 6030 .3	 LDA PLANE.X
- 6040		 SEC
- 6050		 SBC #$01
- 6060		 STA PLANE.X
- 6070		 BCS PLANE.EXIT
- 6080		 LDA #$00
- 6090		 STA PLANE.XMSB
- 6100		 BEQ PLANE.EXIT  ALWAYS
- 6110 *--------------------------------
- 6120 .1	 LDA PLANE.XMSB
- 6130		 BEQ .4
- 6140		 LDA PLANE.X
- 6150		 CMP #$50
- 6160		 BEQ .5
- 6170 *--------------------------------
- 6180 .4	 LDA PLANE.X
- 6190		 CLC
- 6200		 ADC #$01
- 6210		 STA PLANE.X
- 6220		 BCC PLANE.EXIT
- 6230		 LDA #$01
- 6240		 STA PLANE.XMSB
- 6250		 BNE PLANE.EXIT    ALWAYS
- 6260 *--------------------------------
- 6270 .5	 LDA #$00
- 6280		 STA TRANSIT
- 6290		 STA PLANE.SOUND     NO PLANE SOUND
- 6300 *--------------------------------
- 6310 PLANE.EXIT DEC PLANE.TIM
- 6320		 BNE PLANE.LUP
- 6330 *--------------------------------
- 6340 MOD	 LDA #$D0
- 6350 MOD1	 LDX #IRQ3
- 6360 MOD2	 LDY /IRQ3
- 6370		 STA RASTER
- 6380		 STX IRQLO
- 6390		 STY IRQHI
- 6400		 LDA #$81
- 6410		 STA VIC.IRQ
- 6420		 PLA
- 6430		 TAY
- 6440		 PLA
- 6450		 TAX
- 6460		 PLA
- 6470		 RTI
- 6480 *--------------------------------
- 6490 *  IRQ 2	 RESTORE BACKGROUND COLOR
- 6500 *--------------------------------
- 6510 IRQ2	 LDY #$06
- 6520		 LDA VIC.CONTROL.2	TURN OFF HIRES
- 6530		 AND #239
- 6540		 STA IRQ.TEMP2
- 6550		 LDA #223
- 6560		 AND VIC.CONTROL.1	*****
- 6570		 STA IRQ.TEMP1
- 6580		 LDA #ORANGE
- 6590 .1	 LDX RASTER
- 6600		 CPX #$E7
- 6610		 BCC .1 		WAS BNE!
- 6620 *--------------------------------
- 6630		 STA BACKGROUND.COLOR0
- 6640		 STY VIC.MEMORY 	SET UP TEXT MODE
- 6650		 LDA IRQ.TEMP1		TURN OFF HIRES
- 6660		 STA VIC.CONTROL.1
- 6670		 LDA IRQ.TEMP2
- 6680		 STA VIC.CONTROL.2
- 6690 *--------------------------------
- 6700 IRQ2.END	 LDA #$00
- 6710		 LDX #IRQ1
- 6720		 LDY /IRQ1
- 6730		 STA RASTER
- 6740		 STX IRQLO
- 6750		 STY IRQHI
- 6760		 LDA #$81
- 6770		 STA VIC.IRQ
- 6780		 PLA
- 6790		 TAY
- 6800		 PLA
- 6810		 TAX
- 6820		 PLA
- 6830		 RTI
- 6840 *--------------------------------
- 6850 *  IRQ3
- 6860 *--------------------------------
- 6870 IRQ3	 LDA #223
- 6880		 AND VIC.CONTROL.1 ****
- 6890		 STA IRQ.TEMP1
- 6900		 LDA #239
- 6910		 AND VIC.CONTROL.2  *****
- 6920		 STA IRQ.TEMP2
- 6930		 LDA #BROWN
- 6940		 LDY #$06
- 6950 .2	 LDX RASTER
- 6960		 CPX #$CF
- 6970		 BCC .2 	  WAS BNE
- 6980		 STA BACKGROUND.COLOR0
- 6990		 STY VIC.MEMORY
- 7000		 LDA IRQ.TEMP1
- 7010		 STA VIC.CONTROL.1
- 7020		 LDA IRQ.TEMP2
- 7030		 STA VIC.CONTROL.2
- 7040		 LDA #$00
- 7050		 LDX #IRQ1
- 7060		 LDY /IRQ1
- 7070		 STA RASTER
- 7080		 STX IRQLO
- 7090		 STY IRQHI
- 7100		 LDA #$81
- 7110		 STA VIC.IRQ
- 7120		 PLA
- 7130		 TAY
- 7140		 PLA
- 7150		 TAX
- 7160		 PLA
- 7170		 RTI
- 7180 *--------------------------------
- 7190 *  MODIFY CODE IN IRQ1
- 7200 *--------------------------------
- 7210 INIT.IRQ	 SEI
- 7220		 LDA DEMO
- 7230		 TAY
- 7240		 LDA INT.RASTER2,Y
- 7250		 STA MOD+1
- 7260		 TYA
- 7270		 ASL
- 7280		 TAY
- 7290		 LDA INT.ADDRESS,Y
- 7300		 STA MOD1+1
- 7310		 LDA INT.ADDRESS+1,Y
- 7320		 STA MOD2+1
- 7330		 LDA #$B0
- 7340		 STA MOD3+1
- 7350		 LDA #$B6
- 7360		 STA MOD4+1
- 7370 *--------------------------------
- 7380		 CLI
- 7390		 RTS
- 7400 *--------------------------------
- 7410 CHANGE.IRQ SEI
- 7420		 LDA DEMO
- 7430		 BNE INT.END
- 7440 *--------------------------------
- 7450		 LDA BILEVL
- 7460		 AND #$03
- 7470		 TAY
- 7480		 LDA INT.RASTER,Y
- 7490		 STA MOD3+1
- 7500		 LDA INT.CPX,Y
- 7510		 STA MOD4+1
- 7520 *--------------------------------
- 7530 INT.END	 CLI
- 7540		 RTS
- 7550 *--------------------------------
- 7560 *  DELAY ROUTINE
- 7570 *--------------------------------
- 7580 DELAY	 PHA
- 7590		 TYA
- 7600		 PHA
- 7610		 TXA
- 7620		 PHA
- 7630 *--------------------------------
- 7640		 LDY #$05
- 7650 .1	 LDX #$FF
- 7660 .2	 DEX
- 7670		 BNE .2
- 7680		 DEY
- 7690		 BNE .1
- 7700 *--------------------------------
- 7710		 PLA
- 7720		 TAX
- 7730		 PLA
- 7740		 TAY
- 7750		 PLA
- 7760 *--------------------------------
- 7770		 RTS
-
+;--------------------------------
+;  SAVE IRQ.CODE
+;--------------------------------
+IRQ1:		LDA #BLACK
+		STA BACKGROUND_COLOR0
+		JSR SETUP_HIRES
+		INC SEED
+		LDA SPRITE_SCOLIDE
+		STA SPRITE_COLLISION	;READ BELOW GROUND COLLISIONS
+		LDA SPRITE_BCOLIDE
+		STA BUCHIT
+		ORA CHOP_BACK_COLL
+		STA CHOP_BACK_COLL
+		LDA #$00
+		STA CHOP_DIR
+		LDA #$02
+		STA BOMB_SPEED
+		JSR CHECK_ROT
+		JSR DO_BOMBS
+;--------------------------------
+; RESTORE MULTI USED SPRITES
+;--------------------------------
+SP_UPDATE:	LDA #$24
+		STA SPRITE_POINTER+3
+		LDY SUNPH
+		LDA SUN_TABLE,Y
+		STA SPRITE_POINTER+4
+		LDA #WHITE
+		STA SPRITE_COLOR+3
+		LDA #YELLOW
+		STA SPRITE_COLOR+4
+		LDA #$18
+		STA SPRITE_PRIORITY
+;--------------------------------
+UPDATE_YPOS:	LDX #$00
+update_ypos_loop:
+		TXA
+		ASL
+		TAY
+		LDA CHOP_Y,X
+		STA SPRITE_YPOS,Y
+		INX
+		CPX #$06
+		BNE update_ypos_loop
+;--------------------------------
+UPDATE_XPOS:	LDY #$00
+update_xpos_loop:
+		TYA
+		ASL
+		TAX
+		LDA CHOP_X,X
+		STA SPRITE_XPOS,X
+		LDA CHOP_XMSB,X
+		BEQ set_xmsb
+		LDA SPRITE_XMSB
+		ORA SPRITE_MASK,Y
+		STA SPRITE_XMSB
+		JMP continue_xpos_update
+;--------------------------------
+set_xmsb:	LDA SPRITE_MASK,Y
+		EOR #$FF
+		AND SPRITE_XMSB
+		STA SPRITE_XMSB
+continue_xpos_update:
+		INY
+		CPY #$06
+		BNE update_xpos_loop
+;--------------------------------
+DO_TIME:	LDX #$09		;RESET ALL TIMERS
+timer_loop:
+		LDA TIMER1,X
+		BEQ timer_no_dec
+		DEC TIMER1,X
+timer_no_dec:
+		DEX
+		BPL timer_loop
+;--------------------------------
+CHECK_COLL:	LDA CHOP_Y
+		SEC
+		SBC #$29
+		STA IRQ_PLOTY
+		STA CHOP_YSC
+;--------------------------------
+		LDA CHOP_X
+		SEC
+		SBC #$13
+		STA IRQ_TEMP1
+		LDA CHOP_XMSB
+		SBC #$00
+		LSR
+		ROR IRQ_TEMP1
+		LDA IRQ_TEMP1
+		STA IRQ_PLOTX
+		STA CHOP_XSC
+;--------------------------------
+		JSR IRQ_PLOTCL
+		LDA IRQ_PLOTX
+		AND #$03
+		TAX
+;--------------------------------
+; CHECK IF HITTING PAD
+;--------------------------------
+		LDA CHOP_XMSB
+		BNE START_COLL
+		LDA IRQ_PLOTY
+		SEC
+		SBC #$08
+		CMP INILVL
+		BCS START_COLL
+		LDA IRQ_PLOTY
+		CMP MOUNTAIN_TOP
+		BCC START_COLL
+;--------------------------------
+		LDA CHOP_Y
+		CMP INICHT
+		BEQ START_COLL
+		BCC START_COLL
+		LDA CHOP_X
+		CMP #$35
+		BCS START_COLL
+;--------------------------------
+		LDA #$01		;HIT PAD
+		STA HIT0
+;--------------------------------
+START_COLL:	LDA IRQ_PLOTY
+		CMP INILVL		;ABOVE GROUND?
+		BCC above_ground_collision	;YES
+;--------------------------------
+; UNDER GROUND CHECKS
+; DO SOFTWARE COLLISION
+;--------------------------------
+		LDY #$00
+		LDA BOMB_MASK,X
+		EOR #$FF
+		AND (IRQ_LO),Y
+		CMP WATER_COLOR,X
+		BNE check_dirt_collision
+;--------------------------------
+		LDA #$01
+		STA HIT0		;WE HIT WATER
+;--------------------------------
+check_dirt_collision:
+		CMP DIRT_COLOR,X
+		BNE underground_hw_collision
+;--------------------------------
+		LDA #$01
+		STA HIT0
+;--------------------------------
+; UNDERGROUND HARDWARE COLLISION
+;--------------------------------
+underground_hw_collision:
+		LDA CHOP_BACK_COLL
+		AND #$01
+		BEQ NO_COLL
+;--------------------------------
+		LDA INILVL
+		CLC
+		ADC #$09
+		CMP IRQ_PLOTY
+		BCC hit_ground
+;--------------------------------
+			JMP NO_COLL
+;--------------------------------
+; CHECK ABOVE GROUND
+; HARDWARE COLLISION
+;--------------------------------
+above_ground_collision:
+		LDA CHOP_BACK_COLL	;CHOPPER TO BACKGROUND
+		AND #$01		;COPY COLLISION
+		BEQ NO_COLL
+;-------------------------------
+		LDA CHOP_XMSB		;MAKE SURE CHOP
+		BNE smartbomb_collision 	;IS ON LEFT SIDE
+		LDA CHOP_Y
+		CMP INICHT
+		BNE smartbomb_collision
+		LDA CHOP_X
+		CMP #$38		;IF CHOP_X<$3D THEN
+		BCC on_landing_pad	;WE ARE OVER PAD
+;--------------------------------
+; SOFTWARE COLLISION FOR SMARTBOMB
+;--------------------------------
+smartbomb_collision:
+		LDA IRQ_PLOTY
+		STA IRQ_TEMP1
+		LDA CHOP_Y
+		SEC
+		SBC #$2F
+		STA IRQ_PLOTY
+		JSR IRQ_PLOTCL
+;--------------------------------
+		LDY #$00
+		LDA BOMB_MASK,X
+		EOR #$FF
+		AND (IRQ_LO),Y
+		CMP BOMB_SHAPE,X
+		BNE check_mountain_collision
+;--------------------------------
+		LDA INICHT
+		SEC
+		SBC #$02
+		CMP CHOP_Y
+		BEQ check_mountain_collision
+		LDA CHOP_X
+		CMP #$38
+		BCS hit_ground
+;--------------------------------
+check_mountain_collision:
+		LDA IRQ_TEMP1
+		STA IRQ_PLOTY
+		LDA MOUNTAIN_TOP
+		CMP IRQ_PLOTY		;IRQ_PLOTY<=TOP
+		BCC NO_COLL		;NO
+;--------------------------------
+hit_ground:
+		LDA #$01		;WE MUST OF HIT
+		STA HIT0		;GROUND
+		BNE NO_COLL
+;-------------------------------
+on_landing_pad:
+		LDA #$01		;TELL EVERYONE WE ARE
+		STA LANDFG		;ON LANDING PAD
+		BNE DO_SUN
+;--------------------------------
+NO_COLL:	LDA #$00		;WE ARE NOT
+		STA LANDFG		;ON LANDING PAD
+;--------------------------------
+; CHECK FOR PAUSE
+;--------------------------------
+DO_SUN:		LDA PAUSE
+		BEQ sun_no_pause
+		JMP MOD3
+;--------------------------------
+sun_no_pause:
+		LDA SUN_TIM
+		BNE sun_dec_tim
+		LDA #$06
+		STA SUN_TIM
+		LDY SUNPH
+		LDA SUN_TABLE,Y
+		STA SPRITE_POINTER+4
+		INC SUNPH
+		LDA SUNPH
+		CMP #$06
+		BNE sun_dec_tim
+		LDA #$00
+		STA SUNPH
+;--------------------------------
+sun_dec_tim:
+		DEC SUN_TIM
+		LDA CHOP_TIM		;CHECK IF TIME TO DO
+		BEQ do_chopper_update 	;CHOPPER
+;--------------------------------
+		JMP DO_DIRT
+;--------------------------------
+do_chopper_update:
+		LDA CHOP_SPEED		;SET CHOPPER UPDATE
+		STA CHOP_TIM		;SPEED
+		LDX BODPH		;POINT TO THE
+		LDA CHOP_SHAPE,X	;CHOPPER SHAPE THAT
+		STA SPRITE_POINTER	;WE WANT
+		LDA DEMO
+		BEQ MOVE_CHOP
+;--------------------------------
+		JMP MOD3
+;--------------------------------
+; MOVE CHOPPER
+;--------------------------------
+MOVE_CHOP:	LDA INCUD
+		BEQ READ_ST
+		JMP DO_DIRT
+;--------------------------------
+READ_ST:	LDA STICK_TMP
+		ROR
+		BCS DO_DWN
+DO_UP:		PHA
+		LDA CHOP_Y
+		CMP #$3F
+		BEQ up_no_dec
+		DEC CHOP_Y
+up_no_dec:
+		PLA
+;--------------------------------
+DO_DWN:		ROR
+		BCS DO_LFT
+		PHA
+		LDA LANDFG		;CHECK IF ON LANDING
+		BNE down_no_inc		;PAD
+		LDA CHOP_Y
+		INC CHOP_Y
+down_no_inc:
+		PLA
+;--------------------------------
+DO_LFT:		ROR
+		BCS DO_RT
+		PHA
+		LDA #$02
+		STA CHOP_DIR
+		PLA
+;--------------------------------
+DO_RT:		ROR
+		BCS DO_CHOP
+		LDA #$01
+		STA CHOP_DIR
+;--------------------------------
+DO_CHOP:	LDA CHOP_DIR
+		CMP #$01
+		BEQ RIGHT
+		CMP #$02
+		BEQ LEFT
+;--------------------------------
+		JMP DO_DIRT
+;--------------------------------
+LEFT:		LDA BODPH
+		BEQ left_can_move
+;--------------------------------
+		JMP DO_DIRT
+;--------------------------------
+left_can_move:
+		LDA CHOP_XMSB
+		BNE left_move
+		LDA CHOP_X
+		CMP #$1E
+		BEQ DO_DIRT
+left_move:
+		LDA CHOP_X
+		SEC
+		SBC #$01
+		STA CHOP_X
+		BCS DO_DIRT
+		LDA #$00
+		STA CHOP_XMSB
+		BEQ DO_DIRT
+;--------------------------------
+RIGHT:		LDA BODPH
+		CMP #$04
+		BEQ right_can_move
+;--------------------------------
+		JMP DO_DIRT
+;--------------------------------
+right_can_move:
+		LDA CHOP_XMSB
+		BEQ right_move
+		LDA CHOP_X
+		CMP #$2E
+		BEQ DO_DIRT
+;--------------------------------
+right_move:
+		LDA CHOP_X
+		CLC
+		ADC #$01
+		STA CHOP_X
+		BCC DO_DIRT
+		LDA #$01
+		STA CHOP_XMSB
+;--------------------------------
+;  START THE DIRT DROPPING
+;--------------------------------
+DO_DIRT:	DEC CHOP_TIM
+		LDX PLNDIR
+		LDY DROPWT		;WAITING FOR DROP?
+		BEQ START_GUN		;NO
+;--------------------------------
+		LDA PLANE_X
+		SEC
+		SBC #$10
+		STA IRQ_TEMP1
+		LDA PLANE_XMSB
+		SBC #$00
+		LSR
+		ROR IRQ_TEMP1
+		LDA IRQ_TEMP1
+		CMP DRPCOL		;SAME AS DROP COLUMN?
+		BNE START_GUN		;NO
+		INC DROPGO		;DROP DIRT
+;--------------------------------
+START_GUN:	LDA GUNFAL		;DROP GUN?
+		BEQ MOD3		;NO
+		LDA PLANE_X
+		CMP GUN_X
+		BNE MOD3
+		INC GUNFGO		;START GUN FALLING
+		LDA #50
+		STA GUN_Y		;SHOW GUN ON SCREEN
+;--------------------------------
+MOD3:		LDA #$B0
+		LDX <IRQ1_2
+		LDY >IRQ1_2
+		STA RASTER
+		STX IRQLO
+		STY IRQHI
+		LDA #$81
+		STA VIC_IRQ
+		PLA
+		TAY
+		PLA
+		TAX
+		PLA
+		RTI
+;--------------------------------
+; RESTORE BACKGROUND COLOR
+; AT BASE OF MOUNTAINS
+;
+; 	IRQ1_2
+;--------------------------------
+IRQ1_2:		LDA #BLACK
+one:		LDX RASTER
+MOD4:		CPX #$B6
+		BCC one			;WAS BNE!
+		STA BACKGROUND_COLOR0
+;--------------------------------
+demo_check:
+		LDA DEMO		;IN DEMO
+		BEQ not_in_demo		;NO
+;--------------------------------
+		JMP DO_BLADES
+;--------------------------------
+not_in_demo:
+		LDA SPRITE_BCOLIDE
+		STA CHOP_BACK_COLL
+		LDA SPRITE_SCOLIDE	;CLEAR COLLISION REGISTER
+;--------------------------------
+		LDA PRIZE_1		;POINT TO THE BUCKS
+		STA SPRITE_POINTER+3
+		LDA PRIZE_2
+		STA SPRITE_POINTER+4
+		LDA PRIZE_3
+		STA SPRITE_POINTER+5
+;--------------------------------
+		LDA #$07
+		STA SPRITE_MULTI_COLOR
+		LDA #$00
+		STA SPRITE_PRIORITY
+;--------------------------------
+		LDA PRIZE_1C
+		STA SPRITE_COLOR+3
+		LDA PRIZE_2C
+		STA SPRITE_COLOR+4
+		LDA PRIZE_3C
+		STA SPRITE_COLOR+5
+;--------------------------------
+; POSITION BUCKS DURING INTERUPT
+;--------------------------------
+		LDY #$00
+position_bucks_loop:
+		TYA
+		ASL
+		TAX
+		LDA BUC1_X,X
+		STA SPRITE_XPOS+6,X
+		LDA BUC1_XMSB,X
+		BEQ set_bucks_xmsb
+		LDA SPRITE_XMSB
+		ORA SPRITE_MASK+3,Y
+		STA SPRITE_XMSB
+		JMP continue_bucks_position
+set_bucks_xmsb:
+		LDA SPRITE_MASK+3,Y
+		EOR #$FF
+		AND SPRITE_XMSB
+		STA SPRITE_XMSB
+continue_bucks_position:
+		INY
+		CPY #$04
+		BNE position_bucks_loop
+;--------------------------------
+		LDA BUC1_Y
+		STA SPRITE_YPOS+6
+		LDA BUC2_Y
+		STA SPRITE_YPOS+8
+		LDA BUC3_Y
+		STA SPRITE_YPOS+10
+;--------------------------------
+;  CHECK FOR PAUSE
+;--------------------------------
+		LDA PAUSE
+		BEQ DO_BLADES
+		JMP MOD
+;--------------------------------
+;  BLADE CODE
+;--------------------------------
+DO_BLADES:	LDA BLADE_TIM
+		BNE SKIP_BLADE
+		LDA #$01
+		STA BLADE_TIM
+;--------------------------------
+		LDA #$81		;VOICE 1 ON
+		STA $D404
+;--------------------------------
+		LDY BLDPH
+		LDA BLADE_TABLE,Y
+		TAX
+		LDY #$05
+blade_shape_loop:
+		LDA BLADE_SHAPE,X
+		STA SPRITE_MEMORY+09,Y
+		STA SPRITE_MEMORY+$40+09,Y
+		STA SPRITE_MEMORY+$80+09,Y
+		STA SPRITE_MEMORY+$C0+09,Y
+		STA SPRITE_MEMORY+$100+09,Y
+		DEX
+		DEY
+		BPL blade_shape_loop
+		INC BLDPH
+		LDA BLDPH
+		CMP #$0A
+		BNE SKIP_BLADE
+;--------------------------------
+		LDA $D404		;VOICE 1 OFF
+		AND #$FE
+		STA $D404
+;--------------------------------
+		LDA #$00
+		STA BLDPH
+;--------------------------------
+SKIP_BLADE:	DEC BLADE_TIM
+;--------------------------------
+DO_PLANE:	LDA TRANSIT
+		BEQ MOD
+;--------------------------------
+		LDA #$01
+		STA PLANE_TIM
+;--------------------------------
+PLANE_LUP:	LDA PLNDIR
+		BNE plane_right
+;--------------------------------
+		LDA PLANE_XMSB
+		BNE plane_left_move
+		LDA PLANE_X
+		CMP #$02
+		BEQ plane_stop
+plane_left_move:
+		LDA PLANE_X
+		SEC
+		SBC #$01
+		STA PLANE_X
+		BCS PLANE_EXIT
+		LDA #$00
+		STA PLANE_XMSB
+		BEQ PLANE_EXIT		;ALWAYS
+;--------------------------------
+plane_right:
+		LDA PLANE_XMSB
+		BEQ plane_right_move
+		LDA PLANE_X
+		CMP #$50
+		BEQ plane_stop
+;--------------------------------
+plane_right_move:
+		LDA PLANE_X
+		CLC
+		ADC #$01
+		STA PLANE_X
+		BCC PLANE_EXIT
+		LDA #$01
+		STA PLANE_XMSB
+		BNE PLANE_EXIT		;ALWAYS
+;--------------------------------
+plane_stop:
+		LDA #$00
+		STA TRANSIT
+		STA PLANE_SOUND		;NO PLANE SOUND
+;--------------------------------
+PLANE_EXIT:	DEC PLANE_TIM
+		BNE PLANE_LUP
+;--------------------------------
+MOD:		LDA #$D0
+MOD1:		LDX <IRQ3
+MOD2:		LDY >IRQ3
+		STA RASTER
+		STX IRQLO
+		STY IRQHI
+		LDA #$81
+		STA VIC_IRQ
+		PLA
+		TAY
+		PLA
+		TAX
+		PLA
+		RTI
+;--------------------------------
+;  IRQ 2	 RESTORE BACKGROUND COLOR
+;--------------------------------
+IRQ2:		LDY #$06
+		LDA VIC_CONTROL_2	;TURN OFF HIRES
+		AND #239
+		STA IRQ_TEMP2
+		LDA #223
+		AND VIC_CONTROL_1	;*****
+		STA IRQ_TEMP1
+		LDA #ORANGE
+irq2_raster_wait:
+		LDX RASTER
+		CPX #$E7
+		BCC irq2_raster_wait    ;WAS BNE!
+;--------------------------------
+		STA BACKGROUND_COLOR0
+		STY VIC_MEMORY 		;SET UP TEXT MODE
+		LDA IRQ_TEMP1		;TURN OFF HIRES
+		STA VIC_CONTROL_1
+		LDA IRQ_TEMP2
+		STA VIC_CONTROL_2
+;--------------------------------
+IRQ2_END:	LDA #$00
+		LDX <IRQ1
+		LDY >IRQ1
+		STA RASTER
+		STX IRQLO
+		STY IRQHI
+		LDA #$81
+		STA VIC_IRQ
+		PLA
+		TAY
+		PLA
+		TAX
+		PLA
+		RTI
+;--------------------------------
+;  IRQ3
+;--------------------------------
+IRQ3:		LDA #223
+		AND VIC_CONTROL_1
+		STA IRQ_TEMP1
+		LDA #239
+		AND VIC_CONTROL_2
+		STA IRQ_TEMP2
+		LDA #BROWN
+		LDY #$06
+irq3_raster_wait:
+		LDX RASTER
+		CPX #$CF
+		BCC irq3_raster_wait	;WAS BNE
+		STA BACKGROUND_COLOR0
+		STY VIC_MEMORY
+		LDA IRQ_TEMP1
+		STA VIC_CONTROL_1
+		LDA IRQ_TEMP2
+		STA VIC_CONTROL_2
+		LDA #$00
+		LDX <IRQ1
+		LDY >IRQ1
+		STA RASTER
+		STX IRQLO
+		STY IRQHI
+		LDA #$81
+		STA VIC_IRQ
+		PLA
+		TAY
+		PLA
+		TAX
+		PLA
+		RTI
+;--------------------------------
+;  MODIFY CODE IN IRQ1
+;--------------------------------
+INIT_IRQ:	SEI
+		LDA DEMO
+		TAY
+		LDA INT_RASTER2,Y
+		STA MOD+1
+		TYA
+		ASL
+		TAY
+		LDA INT_ADDRESS,Y
+		STA MOD1+1
+		LDA INT_ADDRESS+1,Y
+		STA MOD2+1
+		LDA #$B0
+		STA MOD3+1
+		LDA #$B6
+		STA MOD4+1
+;--------------------------------
+		CLI
+		RTS
+;--------------------------------
+CHANGE_IRQ:	SEI
+		LDA DEMO
+		BNE INT_END
+;--------------------------------
+		LDA BILEVL
+		AND #$03
+		TAY
+		LDA INT_RASTER,Y
+		STA MOD3+1
+		LDA INT_CPX,Y
+		STA MOD4+1
+;--------------------------------
+INT_END:	CLI
+		RTS
+;--------------------------------
+;  DELAY ROUTINE
+;--------------------------------
+DELAY:		PHA
+		TYA
+		PHA
+		TXA
+		PHA
+;--------------------------------
+			LDY #$05
+delay_outer_loop:
+			LDX #$FF
+delay_inner_loop:
+			DEX
+			BNE delay_inner_loop
+			DEY
+			BNE delay_outer_loop
+;--------------------------------
+			PLA
+			TAX
+			PLA
+			TAY
+			PLA
+;--------------------------------
+			RTS

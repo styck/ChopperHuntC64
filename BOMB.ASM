@@ -1,282 +1,281 @@
- 1000 *--------------------------------
- 1010 * SAVE BOMB.CODE
- 1020 *--------------------------------
- 1030 DO.BOMBS	 LDA CHOP.Y	IF CHOP ON PAD
- 1040		 CMP INICHT	THEN DONT LET
- 1050		 BNE .1 	HIM SHOOT
- 1060		 LDA CHOP.XMSB
- 1070		 BNE .1
- 1080		 LDA #$36
- 1090		 CMP CHOP.X
- 1100		 BCC .1
- 1110		 JMP GO2
- 1120 *--------------------------------
- 1130 .1	 LDA CHOP.EXPL
- 1140		 BEQ .13
- 1150		 JMP GO2
- 1160 .13	 LDA STICK.FLAG  READ TRIGGER
- 1170		 BNE .55	 AND DEBOUNCE
- 1180		 LDA STICK.TMP	 IT.
- 1190		 AND #$10
- 1200		 BEQ .54
- 1210		 JMP GO2
- 1220 *--------------------------------
- 1230 .54	 INC STICK.FLAG
- 1240		 BNE NEW.BOMB
- 1250 .55	 LDA STICK.TMP
- 1260		 AND #$10
- 1270		 BEQ GO2
- 1280		 DEC STICK.FLAG    @@
- 1290 *--------------------------------
- 1300		 BEQ GO2	 BRANCH ALWAYS
- 1310 *--------------------------------
- 1320 NEW.BOMB	 LDA BOMBLD
- 1330		 BEQ GO2     NO MORE BOMBS
- 1340 *--------------------------------
- 1350		 LDX #$01    FIND AN INACTIVE  ############
- 1360 BOMTRY	 LDA BOMB,X  BOMB.
- 1370		 BEQ .1      FOUND ONE.
- 1380		 DEX
- 1390		 BPL BOMTRY  KEEP LOOKING
- 1400 *--------------------------------
- 1410		 JMP GO2     DIDN'T FIND ONE
- 1420 .1	 INC BOMIND  INCREMENT ACTIVE BOMBS
- 1430		 DEC BOMBLD  DEC NUMBER OF BOMBS
- 1440 *--------------------------------
- 1450		 LDA CHOP.X    SET UP COORDINATES
- 1460		 SEC	       FOR BOMB DEPENDING
- 1470		 SBC #$13      ON WHERE AND WHICH
- 1480		 STA IRQ.TEMP1 WAY THE CHOPPER
- 1490		 LDA CHOP.XMSB IS FACING
- 1500		 SBC #$00
- 1510		 LSR
- 1520		 ROR IRQ.TEMP1
- 1530		 LDA IRQ.TEMP1
- 1540		 STA BOMBLR,X
- 1550 *--------------------------------
- 1560		 LDY BODPH
- 1570		 LDA BOMDIR,Y
- 1580		 STA BOMBDR,X
- 1590 *--------------------------------
- 1600		 CPY #$02	  IF FACING FRONT
- 1610		 BNE .11
- 1620		 LDA STICK.TMP	  IF STICK PUSHED UP
- 1630		 ROR		  THEN FIRE UP I.E.
- 1640		 BCS .11	  YDEL=-1
- 1650		 LDA #$FF
- 1660		 STA BOMB.YDEL,X
- 1670		 LDA CHOP.Y
- 1680		 SEC
- 1690		 SBC #$35
- 1700		 STA BOMBHT,X
- 1710 *--------------------------------
- 1720		 BNE .22	  ALWAYS
- 1730 *--------------------------------
- 1740 .11	 LDA CHOP.Y   SET BOMBS YPOSITON
- 1750		 SEC
- 1760		 SBC #$29
- 1770 *--------------------------------
- 1780		 STA BOMBHT,X
- 1790		 LDA BOMB.YINC,Y     GET YINC DEPENDING ON BODPH
- 1800		 STA BOMB.YDEL,X
- 1810 .22	 LDA BOMB.CNT.VAL,Y
- 1820		 STA BOMB.CNT,X
- 1830		 INC BOMB,X    @@
- 1840		 INC BOMACT
- 1850 *--------------------------------
- 1860 GO2	 LDY #$01	  #######
- 1870		 STY BOMB.COUNT
- 1880 CHKSHO	 LDA BOMB,Y	  SHOW ALL BOMBS
- 1890		 BNE SHOBOM	  BOMB IS ACTIVE
- 1900 CHKSH2	 DEY
- 1910		 BPL CHKSHO
- 1920 *--------------------------------
- 1930		 JMP GO4
- 1940 *--------------------------------
- 1950 SHOBOM	 STY BOMB.COUNT  NUMBER OF THE BOMB (0-3)
- 1960		 LDA BOMB.CNT,Y
- 1970		 BEQ .11
- 1980		 TYA
- 1990		 TAX
- 2000		 DEC BOMB.CNT,X
- 2010		 JMP GO3
- 2020 *--------------------------------
- 2030 .11	 LDA BOMBHT,Y	 ADD ONE TO THE Y DIRECTION
- 2040		 CLC
- 2050		 ADC BOMB.YDEL,Y
- 2060		 STA BOMBHT,Y
- 2070 *--------------------------------
- 2080 GO3	 LDA BOMBLR,Y	 ADD IN BOMB DIRECTION
- 2090		 CLC		 -1 OR +1
- 2100		 ADC BOMBDR,Y
- 2110		 STA BOMBLR,Y
- 2120		 STA IRQ.PLOTX	     GET SCREEN COORDINATES
- 2130		 LDA BOMBHT,Y	 FOR BOMB
- 2140		 STA IRQ.PLOTY
- 2150		 JSR IRQ.PLOTCL
- 2160		 LDY BOMB.COUNT      SEE IF THERE WAS AND OLD BOMB
- 2170		 LDA ERASE.FLAG,Y    BOMB #Y
- 2180		 BEQ .1 	     NO
- 2190 *--------------------------------
- 2200 *  GET READY TO ERASE OLD BOMB
- 2210 *--------------------------------
- 2220		 LDA BOMB.COUNT     # OF BOMB
- 2230		 ASL		    *2
- 2240		 TAY
- 2250		 LDA TABLE.LO,Y     SAVE ADDRESS OF BOMB
- 2260		 STA OLD.LO
- 2270		 LDA TABLE.LO+1,Y
- 2280		 STA OLD.LO+1
- 2290		 LDY BOMB.COUNT
- 2300		 LDA INDEX.MASK,Y
- 2310		 TAX
- 2320		 LDA BOMB.MASK,X  EXTRACT BITS FROM OLD
- 2330		 EOR #$FF	  BYTE THAT WAS UNDER
- 2340		 AND OLD.BOMB,Y   THE BOMB
- 2350		 STA IRQ.TEMP1
- 2360		 CMP BOMB.SHAPE,X IS IT WHITE
- 2370		 BNE .16	  NO
- 2380		 LDA IRQ.TEMP1
- 2390		 EOR BOMB.SHAPE,X
- 2400		 STA IRQ.TEMP1
- 2410 *--------------------------------
- 2420 .16	 LDY #$00
- 2430		 LDA (OLD.LO),Y
- 2440		 AND BOMB.MASK,X  REMOVE OLD BOMB
- 2450		 ORA IRQ.TEMP1	  PUT BACKROUND BITS
- 2460		 STA IRQ.TEMP1
- 2470 *--------------------------------
- 2480		 LDA INILVL
- 2490		 CMP IRQ.PLOTY	 ABOVE GROUND
- 2500		 BCS .33	 YES
- 2510 *--------------------------------
- 2520		 LDA #$00	 BELOW GROUND
- 2530		 STA IRQ.TEMP1	 ERASE WITH BLACK
- 2540		 LDA (OLD.LO),Y
- 2550		 AND BOMB.MASK,X
- 2560		 ORA IRQ.TEMP1
- 2570		 STA IRQ.TEMP1
- 2580		 JMP .34
- 2590 *--------------------------------
- 2600 .33	 LDA MOUNTAIN.TOP
- 2610		 CMP IRQ.PLOTY	 ABOVE MOUNTAINS?
- 2620		 BCC .34	 NO
- 2630 *--------------------------------
- 2640 *  ERASE BOMB
- 2650 *--------------------------------
- 2660		 LDA #$55	 ERASE WITH BLUE IF ABOVE GROUND AND MOUNTAINS
- 2670		 STA IRQ.TEMP1
- 2680 *--------------------------------
- 2690 .34	 LDA IRQ.TEMP1	 ERASE BOMB
- 2700		 STA (OLD.LO),Y
- 2710 *--------------------------------
- 2720		 LDA IRQ.PLOTX	CHECK IF BOMB
- 2730		 BEQ .11	WENT OFF SCREEN
- 2740		 LDA IRQ.PLOTY
- 2750		 BEQ .11
- 2760		 LDA IRQ.PLOTX
- 2770		 CMP #160
- 2780		 BCS .11
- 2790		 LDA IRQ.PLOTY
- 2800		 CMP #$B0
- 2810		 BCC .1
- 2820 *--------------------------------
- 2830 .11	 LDA #$00
- 2840		 LDY BOMB.COUNT
- 2850		 STA BOMB,Y	   BOMB CAN NOW BE USED
- 2860		 STA ERASE.FLAG,Y  IT DOESN'T NEED ERASED
- 2870		 JMP GO4
- 2880 *--------------------------------
- 2890 * PLOT THE BOMB
- 2900 *--------------------------------
- 2910 .1	 LDA IRQ.PLOTY
- 2920		 CMP INILVL	 ABOVE GROUND?
- 2930		 BCS .22	 NO
- 2940 *--------------------------------
- 2950		 LDA MOUNTAIN.TOP
- 2960		 CMP IRQ.PLOTY
- 2970		 BCC .2 	 NO
- 2980 *--------------------------------
- 2990 * BELOW GROUND CHECK
- 3000 *--------------------------------
- 3010 .22	 LDY #$00
- 3020		 LDA IRQ.PLOTX	 CHECK TO SEE
- 3030		 AND #$03	 IF WE HIT
- 3040		 TAX		 DIRT
- 3050		 LDA BOMB.MASK,X
- 3060		 EOR #$FF	 INVERT MASK
- 3070		 STA IRQ.TEMP1
- 3080		 AND (IRQ.LO),Y
- 3090		 CMP IRQ.TEMP1	 SHOULD BE SAME SINCE DIRT IS $FF
- 3100		 BNE .2 	 DID NOT HIT DIRT
- 3110		 JMP EXPL	 MUST BE DIRT
- 3120 *--------------------------------
- 3130 .2	 LDA IRQ.PLOTY
- 3140		 CMP INILVL	 ABOVE GROUND ?
- 3150		 BCC .27	 YES
- 3160 *--------------------------------
- 3170		 LDA BOMB.MASK,X
- 3180		 EOR #$FF
- 3190		 STA IRQ.TEMP1
- 3200		 AND (IRQ.LO),Y
- 3210		 CMP WATER.COLOR,X
- 3220		 BNE .27	    DID NOT HIT WATER
- 3230 *--------------------------------
- 3240		 INC SPLASH.SOUND   @@
- 3250		 JMP .11	    IT HIT WATER, DISABLE BOMB
- 3260 *--------------------------------
- 3270 .27	 LDY BOMB.COUNT   SAVE BOMBS POSITION
- 3280		 LDA IRQ.PLOTX	  IN BYTE
- 3290		 AND #$03
- 3300		 STA INDEX.MASK,Y
- 3310		 TAX
- 3320		 LDY #$00
- 3330		 LDA (IRQ.LO),Y
- 3340		 LDY BOMB.COUNT   !!
- 3350		 STA OLD.BOMB,Y   !!
- 3360		 LDY #$00	  !!
- 3370		 AND BOMB.MASK,X
- 3380		 ORA BOMB.SHAPE,X
- 3390		 STA (IRQ.LO),Y    PLOT BOMB
- 3400		 LDY BOMB.COUNT
- 3410		 TYA
- 3420		 ASL
- 3430		 TAY
- 3440		 LDA IRQ.LO	   KEEP TRACK OF THE
- 3450		 STA TABLE.LO,Y    ADDRESS OF THE LAST
- 3460		 LDA IRQ.LO+1	   BOMB SO WE CAN ERASE
- 3470		 STA TABLE.LO+1,Y  IT ON THE NEXT PASS
- 3480		 LDY BOMB.COUNT
- 3490		 LDX #$01
- 3500		 STX ERASE.FLAG,Y
- 3510 *--------------------------------
- 3520		 LDA #$00
- 3530		 STA HIT3
- 3540		 JSR DIRT.BOMB
- 3550		 LDA HIT3
- 3560		 BNE EXPL
- 3570 *--------------------------------
- 3580		 JMP CHKSH2
- 3590 *--------------------------------
- 3600 EXPL	 LDY BOMB.COUNT
- 3610		 LDA #$00	 WE CAN NOW USE
- 3620		 STA BOMB,Y	 THIS BOMB
- 3630		 STA ERASE.FLAG,Y
- 3640		 DEC BOMACT	 1 LESS ACTIVE
- 3650		 LDA BOMBHT,Y	 PUT BOMB COORDINATES
- 3660 *--------------------------------
- 3670		 SEC
- 3680		 SBC #$01
- 3690 *--------------------------------
- 3700		 STA EXPHT,Y	 INTO EXPLOSION'S
- 3710		 LDA BOMBLR,Y
- 3720		 STA EXPLR,Y
- 3730		 LDA #$01	 START THE EXPLOSION
- 3740		 STA EXPGO,Y
- 3750 *--------------------------------
- 3760 GO4	 DEC BOMB.SPEED
- 3770		 BEQ .11
- 3780		 JMP GO2
- 3790 *--------------------------------
- 3800 .11	 RTS
-
+;--------------------------------
+; SAVE BOMB.CODE
+;--------------------------------
+DO_BOMBS	LDA CHOP_Y	;IF CHOP ON PAD
+			CMP INICHT	;THEN DONT LET
+			BNE _1 	;HIM SHOOT
+			LDA CHOP_XMSB
+			BNE _1
+			LDA #$36
+			CMP CHOP_X
+			BCC _1
+			JMP GO2
+;--------------------------------
+_1			LDA CHOP_EXPL
+			BEQ _13
+			JMP GO2
+_13			LDA STICK_FLAG	;READ TRIGGER
+			BNE _55	;AND DEBOUNCE
+			LDA STICK_TMP	;IT.
+			AND #$10
+			BEQ _54
+			JMP GO2
+;--------------------------------
+_54			INC STICK_FLAG
+			BNE NEW_BOMB
+_55			LDA STICK_TMP
+			AND #$10
+			BEQ GO2
+			DEC STICK_FLAG	;@@
+;--------------------------------
+			BEQ GO2	;BRANCH ALWAYS
+;--------------------------------
+NEW_BOMB	LDA BOMBLD
+			BEQ GO2		;NO MORE BOMBS
+;--------------------------------
+			LDX #$01	;FIND AN INACTIVE  ############
+BOMTRY		LDA BOMB,X	;BOMB.
+			BEQ _1		;FOUND ONE.
+			DEX
+			BPL BOMTRY	;KEEP LOOKING
+;--------------------------------
+			JMP GO2		;DIDN'T FIND ONE
+_1			INC BOMIND	;INCREMENT ACTIVE BOMBS
+			DEC BOMBLD	;DEC NUMBER OF BOMBS
+;--------------------------------
+			LDA CHOP_X	;SET UP COORDINATES
+			SEC		;FOR BOMB DEPENDING
+			SBC #$13	;ON WHERE AND WHICH
+			STA IRQ_TEMP1	;WAY THE CHOPPER
+			LDA CHOP_XMSB	;IS FACING
+			SBC #$00
+			LSR
+			ROR IRQ_TEMP1
+			LDA IRQ_TEMP1
+			STA BOMBLR,X
+;--------------------------------
+			LDY BODPH
+			LDA BOMDIR,Y
+			STA BOMBDR,X
+;--------------------------------
+			CPY #$02	;IF FACING FRONT
+			BNE _11
+			LDA STICK_TMP	;IF STICK PUSHED UP
+			ROR		;THEN FIRE UP I.E.
+			BCS _11		;YDEL=-1
+			LDA #$FF
+			STA BOMB_YDEL,X
+			LDA CHOP_Y
+			SEC
+			SBC #$35
+			STA BOMBHT,X
+;--------------------------------
+			BNE _22		;ALWAYS
+;--------------------------------
+_11			LDA CHOP_Y	;SET BOMBS YPOSITON
+			SEC
+			SBC #$29
+;--------------------------------
+			STA BOMBHT,X
+			LDA BOMB_YINC,Y	;GET YINC DEPENDING ON BODPH
+			STA BOMB_YDEL,X
+_22			LDA BOMB_CNT_VAL,Y
+			STA BOMB_CNT,X
+			INC BOMB,X	;@@
+			INC BOMACT
+;--------------------------------
+GO2			LDY #$01	;#######
+			STY BOMB_COUNT
+CHKSHO		LDA BOMB,Y	;SHOW ALL BOMBS
+			BNE SHOBOM	;BOMB IS ACTIVE
+CHKSH2		DEY
+			BPL CHKSHO
+;--------------------------------
+			JMP GO4
+;--------------------------------
+SHOBOM		STY BOMB_COUNT	;NUMBER OF THE BOMB (0-3)
+			LDA BOMB_CNT,Y
+			BEQ _11
+			TYA
+			TAX
+			DEC BOMB_CNT,X
+			JMP GO3
+;--------------------------------
+_11			LDA BOMBHT,Y	;ADD ONE TO THE Y DIRECTION
+			CLC
+			ADC BOMB_YDEL,Y
+			STA BOMBHT,Y
+;--------------------------------
+GO3			LDA BOMBLR,Y	;ADD IN BOMB DIRECTION
+			CLC		;-1 OR +1
+			ADC BOMBDR,Y
+			STA BOMBLR,Y
+			STA IRQ_PLOTX	;GET SCREEN COORDINATES
+			LDA BOMBHT,Y	;FOR BOMB
+			STA IRQ_PLOTY
+			JSR IRQ_PLOTCL
+			LDY BOMB_COUNT	;SEE IF THERE WAS AND OLD BOMB
+			LDA ERASE_FLAG,Y	;BOMB #Y
+			BEQ _1 		;NO
+;--------------------------------
+;  GET READY TO ERASE OLD BOMB
+;--------------------------------
+			LDA BOMB_COUNT	;# OF BOMB
+			ASL		;*2
+			TAY
+			LDA TABLE_LO,Y	;SAVE ADDRESS OF BOMB
+			STA OLD_LO
+			LDA TABLE_LO+1,Y
+			STA OLD_LO+1
+			LDY BOMB_COUNT
+			LDA INDEX_MASK,Y
+			TAX
+			LDA BOMB_MASK,X	;EXTRACT BITS FROM OLD
+			EOR #$FF	;BYTE THAT WAS UNDER
+			AND OLD_BOMB,Y	;THE BOMB
+			STA IRQ_TEMP1
+			CMP BOMB_SHAPE,X	;IS IT WHITE
+			BNE _16		;NO
+			LDA IRQ_TEMP1
+			EOR BOMB_SHAPE,X
+			STA IRQ_TEMP1
+;--------------------------------
+_16			LDY #$00
+			LDA (OLD_LO),Y
+			AND BOMB_MASK,X	;REMOVE OLD BOMB
+			ORA IRQ_TEMP1	;PUT BACKROUND BITS
+			STA IRQ_TEMP1
+;--------------------------------
+			LDA INILVL
+			CMP IRQ_PLOTY	;ABOVE GROUND
+			BCS _33		;YES
+;--------------------------------
+			LDA #$00	;BELOW GROUND
+			STA IRQ_TEMP1	;ERASE WITH BLACK
+			LDA (OLD_LO),Y
+			AND BOMB_MASK,X
+			ORA IRQ_TEMP1
+			STA IRQ_TEMP1
+			JMP _34
+;--------------------------------
+_33			LDA MOUNTAIN_TOP
+			CMP IRQ_PLOTY	;ABOVE MOUNTAINS?
+			BCC _34		;NO
+;--------------------------------
+;  ERASE BOMB
+;--------------------------------
+			LDA #$55	;ERASE WITH BLUE IF ABOVE GROUND AND MOUNTAINS
+			STA IRQ_TEMP1
+;--------------------------------
+_34			LDA IRQ_TEMP1	;ERASE BOMB
+			STA (OLD_LO),Y
+;--------------------------------
+			LDA IRQ_PLOTX	;CHECK IF BOMB
+			BEQ _11		;WENT OFF SCREEN
+			LDA IRQ_PLOTY
+			BEQ _11
+			LDA IRQ_PLOTX
+			CMP #160
+			BCS _11
+			LDA IRQ_PLOTY
+			CMP #$B0
+			BCC _1
+;--------------------------------
+_11			LDA #$00
+			LDY BOMB_COUNT
+			STA BOMB,Y	;BOMB CAN NOW BE USED
+			STA ERASE_FLAG,Y	;IT DOESN'T NEED ERASED
+			JMP GO4
+;--------------------------------
+; PLOT THE BOMB
+;--------------------------------
+_1			LDA IRQ_PLOTY
+			CMP INILVL	;ABOVE GROUND?
+			BCS _22		;NO
+;--------------------------------
+			LDA MOUNTAIN_TOP
+			CMP IRQ_PLOTY
+			BCC _2 		;NO
+;--------------------------------
+; BELOW GROUND CHECK
+;--------------------------------
+_22			LDY #$00
+			LDA IRQ_PLOTX	;CHECK TO SEE
+			AND #$03	;IF WE HIT
+			TAX		;DIRT
+			LDA BOMB_MASK,X
+			EOR #$FF	;INVERT MASK
+			STA IRQ_TEMP1
+			AND (IRQ_LO),Y
+			CMP IRQ_TEMP1	;SHOULD BE SAME SINCE DIRT IS $FF
+			BNE _2 		;DID NOT HIT DIRT
+			JMP EXPL	;MUST BE DIRT
+;--------------------------------
+_2			LDA IRQ_PLOTY
+			CMP INILVL	;ABOVE GROUND ?
+			BCC _27		;YES
+;--------------------------------
+			LDA BOMB_MASK,X
+			EOR #$FF
+			STA IRQ_TEMP1
+			AND (IRQ_LO),Y
+			CMP WATER_COLOR,X
+			BNE _27		;DID NOT HIT WATER
+;--------------------------------
+			INC SPLASH_SOUND	;@@
+			JMP _11		;IT HIT WATER, DISABLE BOMB
+;--------------------------------
+_27			LDY BOMB_COUNT	;SAVE BOMBS POSITION
+			LDA IRQ_PLOTX	;IN BYTE
+			AND #$03
+			STA INDEX_MASK,Y
+			TAX
+			LDY #$00
+			LDA (IRQ_LO),Y
+			LDY BOMB_COUNT	;!!
+			STA OLD_BOMB,Y	;!!
+			LDY #$00	;!!
+			AND BOMB_MASK,X
+			ORA BOMB_SHAPE,X
+			STA (IRQ_LO),Y	;PLOT BOMB
+			LDY BOMB_COUNT
+			TYA
+			ASL
+			TAY
+			LDA IRQ_LO	;KEEP TRACK OF THE
+			STA TABLE_LO,Y	;ADDRESS OF THE LAST
+			LDA IRQ_LO+1	;BOMB SO WE CAN ERASE
+			STA TABLE_LO+1,Y	;IT ON THE NEXT PASS
+			LDY BOMB_COUNT
+			LDX #$01
+			STX ERASE_FLAG,Y
+;--------------------------------
+			LDA #$00
+			STA HIT3
+			JSR DIRT_BOMB
+			LDA HIT3
+			BNE EXPL
+;--------------------------------
+			JMP CHKSH2
+;--------------------------------
+EXPL		LDY BOMB_COUNT
+			LDA #$00	;WE CAN NOW USE
+			STA BOMB,Y	;THIS BOMB
+			STA ERASE_FLAG,Y
+			DEC BOMACT	;1 LESS ACTIVE
+			LDA BOMBHT,Y	;PUT BOMB COORDINATES
+;--------------------------------
+			SEC
+			SBC #$01
+;--------------------------------
+			STA EXPHT,Y	;INTO EXPLOSION'S
+			LDA BOMBLR,Y
+			STA EXPLR,Y
+			LDA #$01	;START THE EXPLOSION
+			STA EXPGO,Y
+;--------------------------------
+GO4			DEC BOMB_SPEED
+			BEQ _11
+			JMP GO2
+;--------------------------------
+_11			RTS

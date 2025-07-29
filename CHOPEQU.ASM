@@ -1,716 +1,722 @@
- 1000 *--------------------------------
- 1010 * SAVE CHOP.EQUATES
- 1020 *--------------------------------
- 1030		 .OR $0800
- 1040		 .TF OBJECT,D1
- 1050 *--------------------------------
- 1060 * PROGRAM EQUATES
- 1070 *--------------------------------
- 1080 * PROGRAMMING EQUATES
- 1090 *--------------------------------
- 1100 * CHARACTER SET $5800-$6000
- 1110 * SCREEN MEMORY $4000-$4400
- 1120 * SPRITE MEMORY $4400-$5800
- 1130 * HIRES	      $6000-$8000
- 1140 * PROGRAM SPACE $0800-$3FFF
- 1150 * COLOR MEMORY  $D800-$DC00
- 1160 * VARIABLES     $0400-$0800
- 1170 *--------------------------------
- 1180 * PROGRAM EQUATES
- 1190 *--------------------------------
- 1200 HIRES		  .EQ $6000
- 1210 CHARACTER.MEMORY	  .EQ $5800
- 1220 SCREEN.MEMORY	  .EQ $4000
- 1230 SPRITE.POINTER	  .EQ SCREEN.MEMORY+$3F8
- 1240 SPRITE.MEMORY	  .EQ $4400
- 1250 COLOR.MEMORY	  .EQ $D800
- 1260 *--------------------------------
- 1270 * VIDEO HARDWARE EQUATES
- 1280 *--------------------------------
- 1290 BORDER.COLOR	  .EQ $D020
- 1300 BACKGROUND.COLOR0   .EQ $D021
- 1310 BACKGROUND.COLOR1   .EQ $D022
- 1320 BACKGROUND.COLOR2   .EQ $D023
- 1330 SPRITE.XPOS	  .EQ $D000   PLUS 2*SPRITE NUMBER!
- 1340 SPRITE.YPOS	  .EQ $D001   PLUS 2*SPRITE NUMBER!
- 1350 SPRITE.XMSB	  .EQ $D010   HIGH BIT OF XPOSITION
- 1360 VIC.CONTROL.1	  .EQ $D011   VIC CONTROL REGISTER
- 1370 RASTER		  .EQ $D012   RASTER REGISTER
- 1380 SPRITE.ENABLE	  .EQ $D015   SPRITE ENABLE REGISTER
- 1390 VIC.CONTROL.2	  .EQ $D016   SCROLL AND MULTI-COLOR
- 1400 SPRITE.YXPAND	  .EQ $D017   YXPANSION OF SPRITES
- 1410 VIC.MEMORY	  .EQ $D018   MEMORY BANK CONTROL
- 1420 VIC.IRQ		  .EQ $D019   INTERRUPT FLAGS
- 1430 IRQ.ENABLE	  .EQ $D01A   ENABLES INTERRUPTS
- 1440 SPRITE.PRIORITY	  .EQ $D01B   SPRITE TO BACKGROUND
- 1450 SPRITE.MULTI.COLOR  .EQ $D01C   SPRITE MULTI COLOR
- 1460 SPRITE.XXPAND	  .EQ $D01D   XXPANSION OF SPRITES
- 1470 SPRITE.SCOLIDE	  .EQ $D01E   SPRITE TO SPRITE COLLISION
- 1480 SPRITE.BCOLIDE	  .EQ $D01F   SPRITE TO BACKGROUND COLLISION
- 1490 SPRITE.MCOLOR.0	  .EQ $D025   COLOR REGISTER
- 1500 SPRITE.MCOLOR.1	  .EQ $D026   COLOR REGISTER
- 1510 SPRITE.COLOR	  .EQ $D027   MAIN SPRITE COLOR +SPRITE NUMBER
- 1520 *--------------------------------
- 1530 * CIA HARDWARE EQUATES
- 1540 *--------------------------------
- 1550 PORTA1		  .EQ $DC00
- 1560 PORTB1		  .EQ $DC01
- 1570 DDRA1		  .EQ $DC02
- 1580 DDRB1		  .EQ $DC03
- 1590 PORTA2		  .EQ $DD00
- 1600 PORTB2		  .EQ $DD01
- 1610 DDRA2		  .EQ $DD02
- 1620 DDRB2		  .EQ $DD03
- 1630 CIA.1.IRQ 	  .EQ $DC0D   CIA1 IRQ ENABLE
- 1640 CIA.2.IRQ 	  .EQ $DD0D   CIA2 IRQ ENABLE
- 1650 CIA1.CTRL.A	  .EQ $DC0E   CIA1 CONTROL REG A
- 1660 CIA1.CTRL.B	  .EQ $DC0F   CIA1 CONTROL REG B
- 1670 CIA2.CTRL.A	  .EQ $DD0E   CIA2 CONTROL REG A
- 1680 CIA2.CTRL.B	  .EQ $DD0F   CIA2 CONTROL REG B
- 1690 *--------------------------------
- 1700 * AUDIO HARDWARE EQUATES
- 1710 *--------------------------------
- 1720 FREQ.1	    .EQ $D400
- 1730 FREQ.2	    .EQ $D407
- 1740 FREQ.3	    .EQ $D40E
- 1750 CONTROL.1     .EQ $D404
- 1760 CONTROL.2     .EQ $D40B
- 1770 CONTROL.3     .EQ $D412
- 1780 ATTDEC.1	    .EQ $D405
- 1790 ATTDEC.2	    .EQ $D40C
- 1800 ATTDEC.3	    .EQ $D413
- 1810 SUSREL.1	    .EQ $D406
- 1820 SUSREL.2	    .EQ $D40D
- 1830 SUSREL.3	    .EQ $D414
- 1840 MASTER.VOLUME .EQ $D418
- 1850 *--------------------------------
- 1860 COORD1 .DA#0,#0,#1,#0,#255,#255,#255,#1,#1,#0,#0,#254
- 1870	     .DA#2,#255,#2,#254,#1,#255,#254,#1,#2,#253,#1,#255
- 1880	     .DA#3,#3,#0,#255,#253,#2,#254,#2,#254,#253,#1,#3,#0
- 1890 COORD2 .DA#0,#255,#0,#1,#0,#255,#1,#255,#1,#2,#254,#0
- 1900	     .DA#0,#2,#1,#1,#254,#254,#255,#2,#255,#1,#253,#253
- 1910	     .DA#255,#1,#3,#3,#255,#2,#2,#254,#254,#0,#3,#0,#253
- 1920 *--------------------------------
- 1930 PAD.DATA	.HS 5555AAF00FF00FF0
- 1940		.HS 0FAAAAF00FF00FF0
- 1950		.HS 0FAAAAFFFFFFFFFF
- 1960 *--------------------------------
- 1970 PAD.COLOR .HS 0707		 YELLOW
- 1980 *--------------------------------
- 1990 PADC.ADR	.DA #COLOR.MEMORY+$259
- 2000		.DA /COLOR.MEMORY+$259
- 2010		.HS E1D9
- 2020		.HS 69D9
- 2030		.HS F1D8
- 2040 *--------------------------------
- 2050 COLOR.MEM.LO .HS 06DA
- 2060		   .HS 8ED9
- 2070		   .HS 16D9
- 2080		   .HS 9ED8
- 2090 *--------------------------------
- 2100 COLOR2.MEM.LO .HS 06DA
- 2110		    .HS 8ED9
- 2120		    .HS 16D9
- 2130		    .HS 9ED8
- 2140 * 	    .HS 26D8
- 2150		    .HS 06DA
- 2160		    .HS 8ED9
- 2170		    .HS 16D9
- 2180		    .HS 9ED8
- 2190		    .HS 06DA
- 2200 *--------------------------------
- 2210 SCR.MEM.LO .HS 0842
- 2220		 .HS 9041
- 2230		 .HS 1841
- 2240		 .HS A040
- 2250 *--------------------------------
- 2260 WATERC.ADR .HS 8042  LEVEL 1
- 2270		 .HS 0842  LEVEL 2
- 2280		 .HS 9041  LEVEL 3
- 2290		 .HS 1841  LEVEL 4
- 2300		 .HS 8042  LEVEL 5
- 2310 *--------------------------------
- 2320 WATER.CHECK .HS 285078A0
- 2330 WATER.START .HS 00010203
- 2340 WATER.INDEX .HS 00
- 2350 WATER.TOP   .HS 00
- 2360 INT.RASTER .HS B0988068
- 2370 INT.CPX	 .HS B69E866E
- 2380 INT.RASTER2 .HS DACC
- 2390 INT.ADDRESS .DA #IRQ2
- 2400		  .DA /IRQ2
- 2410		  .DA #IRQ3
- 2420		  .DA /IRQ3
- 2430 *--------------------------------
- 2440 SPRITE.MASK .HS 0102040810204080
- 2450 *--------------------------------
- 2460 ROCOL	 .DA#0
- 2470 EOFS	 .DA#40,#80,#120,#120,#80,#40
- 2480 EOFHT	 .DA#2,#4,#6,#6,#4,#2
- 2490 DIRT.COLUMN .HS 00
- 2500 *--------------------------------
- 2510 BHPO	 .HS 000000
- 2520 BHPO.XMSB  .HS 000000
- 2530 *--------------------------------
- 2540 B2HPO	 .HS 000000
- 2550 B2HPO.XMSB .HS 000000
- 2560 *--------------------------------
- 2570 BOFS	 .DA#56,#106,#156
- 2580 BNUMBER	 .HS 00
- 2590 COLIX	 .HS 0000010002000100
- 2600 SCOOFS	 .HS 0000010203050607
- 2610 P1LINI	 .HS 0303
- 2620 P2LINI	 .HS 0003
- 2630 LIFE1	 .HS 0000
- 2640 LIFE2	 .HS 0000
- 2650 PLOTBL	 .HS C0300C03
- 2660 BUCKSN	 .HS 386C44F6C6DE446C3854
- 2670 BUSH.LO	 .DA #BUSH
- 2680 BUSH.HI	 .DA /BUSH
- 2690 SCR.LO	 .DA #SCR
- 2700 SCR.HI	 .DA /SCR
- 2710 ATT.LO	 .DA #ATT
- 2720 ATT.HI	 .DA /ATT
- 2730 *--------------------------------
- 2740 DIE.FLAG	 .BS2
- 2750 SURFACE.X  .BS1
- 2760 SCAN.X	 .BS1
- 2770 SCAN.Y	 .BS1
- 2780 DUD	 .BS1
- 2790 START	 .BS1
- 2800 *--------------------------------
- 2810 BLADE.SHAPE .HS 03F000000FC0
- 2820		  .HS 00F000000F00
- 2830		  .HS 003000000C00
- 2840		  .HS 000C00003000
- 2850		  .HS 000F0000F000
- 2860		  .HS 000FC003F000
- 2870		  .HS 000F0000F000
- 2880		  .HS 000C00003000
- 2890		  .HS 003000000C00
- 2900		  .HS 00F000000F00
- 2910 BLADE.TABLE .HS 050B11171D23292F353B
- 2920 SUN.TABLE   .HS 1C1D1E1F2021
- 2930 *UPDN	  .HS 000000000001FF0000
- 2940 * 	 .HS 01FF000001FF00
- 2950 BLDINC	 .DA#255
- 2960 *--------------------------------
- 2970 BOMDIR	 .HS FFFF000101
- 2980 BOMON	 .HS 030C30C0
- 2990 BOMOFF	 .HS FCF3CF3F
- 3000 *--------------------------------
- 3010 BOMB.SHAPE  .HS 8020080280200802
- 3020 BOMB.MASK   .HS 3FCFF3FC3FCFF3FC
- 3030 DIRT.COLOR  .HS C0300C03C0300C03
- 3040 ROCK.COLOR  .HS C0300C03C0300C03
- 3050 WATER.COLOR .HS 40100401
- 3060 DIRT.TEXTURE .HS FFFFFFFFFF
- 3070 COL0	 .HS D424242426242224
- 3080 COL1	 .HS 880F0F8888888888
- 3090 INTDC0	 .HS 7286A616A636C678
- 3100 INTDC1	 .HS 0A342476149408A6
- 3110 INTDBG	 .HS 0080800000000000
- 3120 SKYC1	 .HS 80
- 3130 SKYC2	 .HS 80
- 3140 SKYC3	 .HS 80000000
- 3150 WTRC1	 .HS 0F0F0F888888
- 3160 PC0	 .HS 0034C40000000000
- 3170 P0SIZ	 .HS 0001000000000000
- 3180 SCORE.COLOR .HS 0606060606060606
- 3190		  .HS 0707070D0D0D
- 3200		  .HS 010101010101
- 3210 PLNORG	 .HS 55010000
- 3220 PLNLIM	 .HS 00006001
- 3230 *--------------------------------
- 3240 * SPRITE POINTERS
- 3250 *--------------------------------
- 3260 PLN.SHAPE  .HS 1516
- 3270 GUN.SHAPE  .HS 1718191A1B
- 3280 CHOP.SHAPE .HS 1011121314
- 3290 PRIZE.SHAPE .HS 25262728292A252627
- 3300 PRIZE.COLOR .HS 0B05030301070B0503
- 3310 *--------------------------------
- 3320 OBDATA	 .HS 2020202020202430
- 3330 DRNVOL	 .HS 20202021212222232323242424
- 3340		 .HS 2424242424232323232222212120
- 3350 *--------------------------------
- 3360 LEVEL.MSG      .AS "      LEVEL 00      "
- 3370 BUC.VALUE.MSG  .AS " TREASURE = $2,000  "
- 3380 PLAYER.MSG     .AS "      PLAYER 1      "
- 3390 ONE.PLAYER.MSG .AS "    ONE PLAYER      "
- 3400 TWO.PLAYER.MSG .AS "    TWO PLAYERS     "
- 3410 ONE.STICK.MSG  .AS "    ONE  STICK      "
- 3420 TWO.STICK.MSG  .AS "    TWO  STICKS     "
- 3430 GAME.OVR.MSG   .AS "     GAME  OVER     "
- 3440 HI.SCORE.MSG   .AS "     HIGH SCORE     "
- 3450 *--------------------------------
- 3460 SCORE.ONE      .AS "        "
- 3470 SCORE.TWO      .AS "        "
- 3480 SCORE.HI	     .AS "        "
- 3490 *--------------------------------
- 3500 NAME	     .AS "  7 SEPTEMBER 1984  "
- 3510 NAME2	     .AS "  TO MY DAUGHTER,   "
- 3520 NAME3	     .AS "< NICHELLE  STYCK > "
- 3530 *--------------------------------
- 3540 PLAYER.COLOR .HS 0D0A
- 3550 PLAYC0	 .HS 8ACA
- 3560 LCOLRS	 .HS 090809080908090809080908
- 3570 *--------------------------------
- 3580 *  SPEED OF FALLING DIRT
- 3590 *--------------------------------
- 3600 FALLS	 .DA#9,#7,#5,#5,#4,#4,#3,#3,#3,#2,#2,#2,#2
- 3610		 .DA#2,#2,#2,#2,#2,#2,#2,#2,#2,#1,#1,#1
- 3620 *--------------------------------
- 3630 SSPDS	 .DA#0,#4,#3,#2,#3,#2,#1,#2,#2,#1,#1,#1,#2
- 3640		 .DA#2,#1,#1,#1,#1,#1,#1,#1,#1,#2,#1,#1
- 3650 GUNPRS	 .DA#0,#1,#1,#1,#1,#1,#1,#1,#1,#1,#1,#1,#1
- 3660		 .DA#1,#1,#1,#1,#1,#1,#1,#1,#1,#1,#1,#1
- 3670 GCHANC	 .HS 3F060504040404040303030201
- 3680		 .HS 030302020303030201010201
- 3690 *--------------------------------
- 3700 *  MAX NUMBER OF FALLING DIRT
- 3710 *--------------------------------
- 3720 RMAX	 .DA#4,#5,#4,#5,#4,#5,#6,#4,#5,#6,#7,#8,#4
- 3730		 .DA#5,#6,#7,#7,#7,#8,#8,#8,#9,#7,#8,#9
- 3740 *--------------------------------
- 3750 * PRIZE VALUES
- 3760 *--------------------------------
- 3770 B1VALS	 .DA#2,#2,#2,#2,#2,#3,#3,#3,#3,#3,#4,#4,#4
- 3780		 .DA#4,#4,#5,#5,#5,#5,#5,#6,#6,#6,#6,#6,#7
- 3790		 .DA#7,#7,#7,#7,#8,#8,#8,#8,#8,#9,#9,#9,#9
- 3800 B2VALS	 .DA#0,#2,#4,#6,#8,#0,#2,#4,#6,#8,#0,#2,#4
- 3810		 .DA#6,#8,#0,#2,#4,#6,#8,#0,#2,#4,#6,#8,#0
- 3820		 .DA#2,#4,#6,#8,#0,#2,#4,#6,#8,#0,#2,#4,#6
- 3830 *--------------------------------
- 3840 PADLOC	 .HS 7E664E3636
- 3850 PADLOC2	 .HS 7860483030
- 3860 *--------------------------------
- 3870 GROUND	 .HS 8068503838
- 3880 BUCADF	 .DA#165,#145,#121,#97
- 3890 BUCHGT	 .HS C29A326A6A
- 3900 ICTBL	 .HS A38B735B
- 3910 PADLIN	 .DA#159,#135,#111,#87
- 3920 *--------------------------------
- 3930 SUN.HT	 .HS 4242424242
- 3940 SUN.LR	 .HS 3030303030
- 3950 *--------------------------------
- 3960 BUC.YPOS	 .HS CFBBA08B80404040
- 3970 BUC.XPOS	 .HS 50C8F0FFA078
- 3980 *--------------------------------
- 3990 UWTBL	 .HS 00000203
- 4000 SWTBL	 .HS 00000102
- 4010 SURMIN	 .HS 00050A10
- 4020 SURMAX	 .HS 000A10141618
- 4030 UNDER.X	 .HS 141E28404E5860
- 4040 UNDER.Y	 .HS 08101508101508
- 4050 UNDMIN	 .HS 0407090B090704
- 4060 UNDMAX	 .HS 14160E100E1614
- 4070 *--------------------------------
- 4080 GUNOFF	 .HS C3
- 4090 GUNON	 .HS 3C
- 4100 WPXADD	 .DA#0,#1,#255,#0,#1,#2,#255,#0,#1,#2,#0,#1
- 4110 WPYADD	 .DA#0,#0,#1,#1,#1,#1,#2,#2,#2,#2,#3,#3
- 4120 *--------------------------------
- 4130 STICK.NUMBER  .BS1
- 4140 ABORT	 .BS1
- 4150 ABORT.FLAG .BS1
- 4160 KEYTEMP	 .BS1
- 4170 NAME.FLAG  .BS1
- 4180 SEED	 .BS1
- 4190 CHOP.YTEM  .BS1
- 4200 LANDFG	 .BS1
- 4210 BOMACT	 .BS1
- 4220 BOMBLD	 .BS1
- 4230 BUCHIT	 .BS1
- 4240 *--------------------------------
- 4250 SCOPOS	 .BS1
- 4260 SCOCHG	 .BS1
- 4270 SCOMAX	 .BS2
- 4280 SCOVAL	 .BS8
- 4290 SCOV0	 .BS2
- 4300 SCOV1	 .BS2
- 4310 SCOV2	 .BS2
- 4320 SCOV3	 .BS2
- 4330 SCOV4	 .BS2
- 4340 SCOV5	 .BS2
- 4350 SCOV6	 .BS2
- 4360 SCOV7	 .BS2
- 4370 *--------------------------------
- 4380 PLAYRS	 .BS1
- 4390 SAMEPL	 .BS1
- 4400 LIFHLD	 .BS1
- 4410 EXPCNT	 .BS1
- 4420 PLTCLR	 .BS1
- 4430 COUNTR	 .BS1
- 4440 HIHLD	 .BS1
- 4450 LOHLD	 .BS1
- 4460 PLOTBYT	 .BS1
- 4470 COLOR	 .BS1
- 4480 DROP1	 .BS1
- 4490 DROP2	 .BS1
- 4500 HOLD1	 .BS1
- 4510 DRPCOL	 .BS1
- 4520 DRPFLG	 .BS1
- 4530 ROCNT	 .BS1
- 4540 BSX	 .BS1
- 4550 BSY	 .BS1
- 4560 IRQ.BSX	 .BS1
- 4570 IRQ.BSY	 .BS1
- 4580 SHOB1	 .BS1
- 4590 SHOB2	 .BS1
- 4600 SHOB3	 .BS1
- 4610 MOVED	 .BS1
- 4620 MOVED2	 .BS1
- 4630 HT	 .BS1
- 4640 EOFSET	 .BS1
- 4650 XPOS	 .BS21
- 4660 YPOS	 .BS21
- 4670 CNT	 .BS21
- 4680 *--------------------------------
- 4690 RX1	 .BS11
- 4700 RX2	 .BS11
- 4710 RX3	 .BS11
- 4720 RX4	 .BS11
- 4730 RX5	 .BS11
- 4740 RX6	 .BS11
- 4750 *--------------------------------
- 4760 RY1	 .BS11
- 4770 RY2	 .BS11
- 4780 RY3	 .BS11
- 4790 RY4	 .BS11
- 4800 RY5	 .BS11
- 4810 RY6	 .BS11
- 4820 *--------------------------------
- 4830 KILL.DIRT.FLAG .BS11
- 4840 *--------------------------------
- 4850 LRIND	 .HS 00
- 4860 EXPHT	 .HS 000000000000
- 4870 EXPLR	 .HS 000000000000
- 4880 EXPGO	 .HS 000000000000
- 4890 BOMB	 .HS 00000000
- 4900 BOMBHT	 .HS 00000000
- 4910 BOMBLR	 .HS 00000000
- 4920 BOMBDR	 .HS 00000000
- 4930 *--------------------------------
- 4940 BOMB.CNT.VAL  .HS 0905010509
- 4950 *--------------------------------
- 4960 BOMB.YINC  .HS 0102010201
- 4970 BOMB.YDEL  .BS5
- 4980 HP0	 .BS8
- 4990 DRTHIT	 .BS1
- 5000 NOUPDT	 .BS1
- 5010 BOMBCT	 .BS4
- 5020 BOMTIM	 .BS4
- 5030 TRANSIT	 .BS1
- 5040 PLNDIR	 .BS1
- 5050 CHOP.DIR	 .BS1
- 5060 CLOUD.DIR  .BS1
- 5070 CLOUD.FG	 .BS1
- 5080 ABCNT	 .BS1
- 5090 ABONUM	 .BS1
- 5100 SCOLIN	 .BS20
- 5110 *--------------------------------
- 5120 DEMO	 .BS1
- 5130 DEWAIT	 .BS1
- 5140 LETTER	 .BS1
- 5150 *--------------------------------
- 5160 NPWAIT	 .BS1
- 5170 *--------------------------------
- 5180 LAND.SOUND .BS1
- 5190 LAND.FREQ  .BS1
- 5200 BUC.SOUND  .BS1
- 5210 *--------------------------------
- 5220 ABOFRQ	   .BS1
- 5230 EXPL.FREQ    .BS1
- 5240 EXPL.SOUND   .BS1
- 5250 SPLASH.SOUND .BS1
- 5260 PLANE.SOUND  .BS1
- 5270 SHOT.SOUND   .BS1
- 5280 *--------------------------------
- 5290 PRSCNT	 .BS1
- 5300 BOMIND	 .BS1
- 5310 BDIG1	 .BS1
- 5320 BDIG2	 .BS1
- 5330 NEWLFG	 .BS1
- 5340 BBRITE	 .BS1
- 5350 M2IX	 .BS1
- 5360 INEXPC	 .BS1
- 5370 SHOLTR	 .BS1
- 5380 INBRIT	 .BS1
- 5390 BFXHLD	 .BS1
- 5400 *--------------------------------
- 5410 EXPBGC	 .BS1
- 5420 TEMPCX	 .BS1
- 5430 *--------------------------------
- 5440 * COLORS
- 5450 *--------------------------------
- 5460 BLACK		  .EQ $00
- 5470 WHITE		  .EQ $01
- 5480 RED		  .EQ $02
- 5490 CYAN		  .EQ $03
- 5500 PURPLE		  .EQ $04
- 5510 GREEN		  .EQ $05
- 5520 BLUE		  .EQ $06
- 5530 YELLOW		  .EQ $07
- 5540 ORANGE		  .EQ $08
- 5550 BROWN		  .EQ $09
- 5560 LT.RED		  .EQ $0A
- 5570 DK.GREY		  .EQ $0B
- 5580 MED.GREY		  .EQ $0C
- 5590 LT.GREEN		  .EQ $0D
- 5600 LT.BLUE		  .EQ $0E
- 5610 LT.GREY		  .EQ $0F
- 5620 *--------------------------------
- 5630 IRQLO		  .EQ $314
- 5640 IRQHI		  .EQ $315
- 5650 NMI.VECTOR	  .EQ $318
- 5660 *--------------------------------
- 5670 * ZERO PAGE VARIABLES
- 5680 *--------------------------------
- 5690		 .DUMMY
- 5700		 .OR $05
- 5710 PAUSE	 .BS1
- 5720 CHOP.X	 .BS1
- 5730 CHOP.XMSB  .BS1
- 5740 PLANE.X	 .BS1
- 5750 PLANE.XMSB .BS1
- 5760 GUN.X	 .BS1
- 5770 GUN.XMSB	 .BS1
- 5780 CLOUD.X	 .BS1
- 5790 CLOUD.XMSB .BS1
- 5800 SUN.X	 .BS1
- 5810 SUN.XMSB	 .BS1
- 5820 EXTRA.X	 .BS1
- 5830 EXTRA.XMSB .BS1
- 5840 EXTRA1.X	 .BS1
- 5850 EXTRA1.XMSB .BS1
- 5860 EXTRA2.X	 .BS1
- 5870 EXTRA2.XMSB .BS1
- 5880 *--------------------------------
- 5890 BUC1.X	 .BS1
- 5900 BUC1.XMSB  .BS1
- 5910 BUC2.X	 .BS1
- 5920 BUC2.XMSB  .BS1
- 5930 BUC3.X	 .BS1
- 5940 BUC3.XMSB  .BS1
- 5950 *--------------------------------
- 5960 CHOP.Y	 .BS1
- 5970 PLANE.Y	 .BS1
- 5980 GUN.Y	 .BS1
- 5990 CLOUD.Y	 .BS1
- 6000 SUN.Y	 .BS1
- 6010 EXTRA.Y	 .BS1
- 6020 EXTRA1.Y	 .BS1
- 6030 EXTRA2.Y	 .BS1
- 6040 *--------------------------------
- 6050 BUC1.Y	 .BS1
- 6060 BUC2.Y	 .BS1
- 6070 BUC3.Y	 .BS1
- 6080 *--------------------------------
- 6090 GUN.X.SC	 .BS1
- 6100 GUN.Y.SC	 .BS1
- 6110 CHOP.XSC	 .BS1
- 6120 CHOP.YSC	 .BS1
- 6130 *--------------------------------
- 6140 MOUNTAIN.TOP .BS1
- 6150 *--------------------------------
- 6160 CHOP.TIM	 .BS1
- 6170 PLANE.TIM  .BS1
- 6180 BLADE.TIM  .BS1
- 6190 CLOUD.TIM  .BS1
- 6200 SUN.TIM	 .BS1
- 6210 GUN.TIM	 .BS1
- 6220 CHOP.SPEED .BS1	USED TO SET CHOP.TIM
- 6230 BOMB.SPEED .BS1
- 6240 BLADE.SPEED .BS1	CONTROLS BLADE SOUND
- 6250 BLADE.SPEED2 .BS1
- 6260 BLADE.SOUND .BS1	=1 NO SOUND
- 6270 CHOP.POS	 .BS1	INDEX TO TABLE OF CHOPPER MOVEMENTS
- 6280 CHOP.EXPL  .BS1	FLAG IF CHOP EXPLODING
- 6290 BHIT1	 .BS1
- 6300 BHIT2	 .BS1
- 6310 BHIT3	 .BS1
- 6320 BHIT4	 .BS1
- 6330 HIT0	 .BS1
- 6340 HIT1	 .BS1
- 6350 HIT2	 .BS1
- 6360 HIT3	 .BS1
- 6370 SPRITE.COLLISION .BS1
- 6380 CHOP.BACK.COLL   .BS1
- 6390 *--------------------------------
- 6400 BLDPH	 .BS1
- 6410 SUNPH	 .BS1
- 6420 BODPH	 .BS1
- 6430 *--------------------------------
- 6440 ROTATE.LEFT  .BS1
- 6450 ROTATE.RIGHT .BS1
- 6460 *--------------------------------
- 6470 CHOPT	 .BS1
- 6480 STKIND	 .BS1
- 6490 INCUD	 .BS1
- 6500 INCLR	 .BS1
- 6510 COUNT	 .BS1
- 6520 ROTGT	 .BS1
- 6530 ROTINC	 .BS1
- 6540 DROPWT	 .BS1
- 6550 DROPGO	 .BS1
- 6560 FERRY	 .BS1
- 6570 FERIX	 .BS1
- 6580 LEVEL	 .BS2
- 6590 BILEVL	 .BS1
- 6600 LIVES	 .BS2
- 6610 BUCHPC	 .BS1
- 6620 BUCHPC.XMSB .BS1
- 6630 BUCVPC	 .BS1
- 6640 TURNO	 .BS1
- 6650 CKTDIR	 .BS1
- 6660 BUCTRY	 .BS1
- 6670 BUC.NUM	 .BS1	 BNUMBR
- 6680 *PLRSIX	  .BS1
- 6690 *OTSIND	  .BS1
- 6700 BUCADD	 .BS1
- 6710 BUCLVL	 .BS1
- 6720 BUCVL1	 .BS1
- 6730 BUCVL2	 .BS1
- 6740 PADLVL	 .BS1
- 6750 PADLVL2	 .BS1
- 6760 INILVL	 .BS1
- 6770 FALSPD	 .BS1
- 6780 INICHT	 .BS1
- 6790 PADLN	 .BS1
- 6800 INIFLG	 .BS1
- 6810 GPFLG	 .BS1
- 6820 SHTSPD	 .BS1
- 6830 GUNCHN	 .BS1
- 6840 ROCMAX	 .BS1
- 6850 TRANCT	 .BS1
- 6860 CHANGP	 .BS1
- 6870 *--------------------------------
- 6880 UNDWTR	 .BS1
- 6890 SURWTR	 .BS1
- 6900 SURTMP	 .BS1
- 6910 DEPTH	 .BS1
- 6920 WTRLIN	 .BS1
- 6930 WTRLFT	 .BS1
- 6940 WTRLEN	 .BS1
- 6950 UNDTMP	 .BS1
- 6960 MINDEP	 .BS1
- 6970 UNDFAC	 .BS1
- 6980 TYPE2	 .BS1
- 6990 WATERX	 .BS1
- 7000 WATERY	 .BS1
- 7010 WPHASE	 .BS1
- 7020 *--------------------------------
- 7030 GUNACT	 .BS1
- 7040 GUNFAL	 .BS1
- 7050 GUNFGO	 .BS1
- 7060 GUNSHT	 .BS1
- 7070 GUN.LAND	 .BS1
- 7080 GUN.PHASE  .BS1
- 7090 *--------------------------------
- 7100 TGTX	 .BS1
- 7110 TGTY	 .BS1
- 7120 SHOTX	 .BS1
- 7130 SHOTY	 .BS1
- 7140 SHOTON	 .BS1
- 7150 SHOTDR	 .BS1
- 7160 *PRVDAT	  .BS1
- 7170 *--------------------------------
- 7180 PRIZE.1	 .BS1
- 7190 PRIZE.2	 .BS1
- 7200 PRIZE.3	 .BS1
- 7210 PRIZE.1C	 .BS1
- 7220 PRIZE.2C	 .BS1
- 7230 PRIZE.3C	 .BS1
- 7240 *--------------------------------
- 7250 PXINCH	 .BS1
- 7260 PXINCL	 .BS1
- 7270 PYINCH	 .BS1
- 7280 PYINCL	 .BS1
- 7290 PXHOLD	 .BS1
- 7300 PYHOLD	 .BS1
- 7310 DELTAX	 .BS1
- 7320 DELTAY	 .BS1
- 7330 SXHLDA	 .BS1
- 7340 *INTCNT	  .BS1
- 7350 WLO	 .BS1
- 7360 WHI	 .BS1
- 7370 SOIL	 .BS1
- 7380 PADC.LO	 .BS1
- 7390 PADC.HI	 .BS1
- 7400 PADLO	 .BS1
- 7410 PADHI	 .BS1
- 7420 LO	 .BS2
- 7430 IRQ.LO	 .BS2
- 7440 JLO	 .BS2
- 7450 IRQ.JLO	 .BS2
- 7460 OLD.LO	 .BS8
- 7470 OLD.BOMB	 .BS4
- 7480 INDEX.MASK .BS4
- 7490 ERASE.FLAG .BS4
- 7500 ROTATE.FLAG .BS1
- 7510 *--------------------------------
- 7520 BUC1VP	 .BS1
- 7530 BUC2VP	 .BS1
- 7540 BUC3VP	 .BS1
- 7550 *--------------------------------
- 7560 B2C1VP	 .BS1
- 7570 B2C2VP	 .BS1
- 7580 B2C3VP	 .BS1
- 7590 *--------------------------------
- 7600 PLOTX	 .BS1
- 7610 PLOTY	 .BS1
- 7620 IRQ.PLOTX  .BS1
- 7630 IRQ.PLOTY  .BS1
- 7640 *SPLCNT	  .BS1
- 7650 BDEAD	 .BS1
- 7660 DEAD	 .BS1
- 7670 DRPNUM	 .BS1
- 7680 PLAYER	 .BS1
- 7690 RANDOM	 .BS1
- 7700 BOMB.COUNT .BS1
- 7710 BOMB.CNT	 .BS4
- 7720 TABLE.LO	 .BS8
- 7730 *--------------------------------
- 7740 TEMP1	 .BS1			GENERAL PURPOSE VARIABLE
- 7750 TEMP2	 .BS1			GENERAL PURPOSE VARIABLE
- 7760 TEMP3	 .BS1			GENERAL PURPOSE VARIABLE
- 7770 TEMP4	 .BS1			GENERAL PURPOSE VARIABLE
- 7780 TEMP5	 .BS1			GENERAL PURPOSE VARIABLE
- 7790 TEMP6	 .BS1			GENERAL PURPOSE VARIABLE
- 7800 TEMP7	 .BS1			GENERAL PURPOSE VARIABLE
- 7810 STICK.FLAG .BS1
- 7820 STICK.TMP  .BS1
- 7830 WATER.TEMP .BS1
- 7840 *--------------------------------
- 7850 IRQ.TEMP1  .BS1
- 7860 IRQ.TEMP2  .BS1
- 7870 IRQ.TEMP3  .BS1
- 7880 IRQ.TEMP4  .BS1
- 7890 IRQ.TEMP5  .BS1
- 7900 IRQ.TEMP6  .BS1
- 7910 *--------------------------------
- 7920 MULT1	 .BS1			USED BY MULTIPLICATION ROUTINE
- 7930 MULT2	 .BS1
- 7940 MULTIPLIER .BS1
- 7950 *--------------------------------
- 7960 DIVISOR	 .BS1			USED BY DIVISION ROUTINE
- 7970 DIVIDEND	 .BS1
- 7980 REMAINDER  .BS1
- 7990 *--------------------------------
- 8000 PRINTX	 .BS1			USED BY PRINT ROUTINE
- 8010 PRINTY	 .BS1
- 8020 PRINT.COLOR .BS1
- 8030 *--------------------------------
- 8040 TIMER1	 .BS1
- 8050 TIMER2	 .BS1
- 8060 TIMER3	 .BS1
- 8070 TIMER4	 .BS1
- 8080 TIMER5	 .BS1
- 8090 TIMER6	 .BS1
- 8100 TIMER7	 .BS1
- 8110 TIMER8	 .BS1
- 8120 TIMER9	 .BS1
- 8130 *--------------------------------
- 8140			  .ED
-
+;;*--------------------------------
+;;* SAVE CHOP EQUATES
+;*--------------------------------
+;		 * = $0800
+;*--------------------------------
+;* PROGRAM EQUATES
+;*--------------------------------
+;* PROGRAMMING EQUATES
+;*--------------------------------
+;* CHARACTER SET $5800-$6000
+;* SCREEN MEMORY $4000-$4400
+;* SPRITE MEMORY $4400-$5800
+;* HIRES	      $6000-$8000
+;* PROGRAM SPACE $0800-$3FFF
+;* COLOR MEMORY  $D800-$DC00
+;* VARIABLES     $0400-$0800
+;*--------------------------------
+;* PROGRAM EQUATES
+;*--------------------------------
+HIRES		  = $6000
+CHARACTER_MEMORY	  = $5800
+SCREEN_MEMORY	  = $4000
+SPRITE_POINTER	  = SCREEN_MEMORY+$3F8
+SPRITE_MEMORY	  = $4400
+COLOR_MEMORY	  = $D800
+;*--------------------------------
+;* VIDEO HARDWARE EQUATES
+;*--------------------------------
+BORDER_COLOR	  = $D020
+BACKGROUND_COLOR0   = $D021
+BACKGROUND_COLOR1   = $D022
+BACKGROUND_COLOR2   = $D023
+SPRITE_XPOS	  = $D000   ;PLUS 2*SPRITE NUMBER!
+SPRITE_YPOS	  = $D001   ;PLUS 2*SPRITE NUMBER!
+SPRITE_XMSB	  = $D010   ;HIGH BIT OF XPOSITION
+VIC_CONTROL_1	  = $D011   ;VIC CONTROL REGISTER
+RASTER		  = $D012   ;RASTER REGISTER
+SPRITE_ENABLE	  = $D015   ;SPRITE ENABLE REGISTER
+VIC_CONTROL_2	  = $D016   ;SCROLL AND MULTI-COLOR
+SPRITE_YXPAND	  = $D017   ;YXPANSION OF SPRITES
+VIC_MEMORY	  = $D018   ;MEMORY BANK CONTROL
+VIC_IRQ		  = $D019   ;INTERRUPT FLAGS
+IRQ_ENABLE	  = $D01A   ;ENABLES INTERRUPTS
+SPRITE_PRIORITY	  = $D01B   ;SPRITE TO BACKGROUND
+SPRITE_MULTI_COLOR  = $D01C   ;SPRITE MULTI COLOR
+SPRITE_XXPAND	  = $D01D   ;XXPANSION OF SPRITES
+SPRITE_SCOLIDE	  = $D01E   ;SPRITE TO SPRITE COLLISION
+SPRITE_BCOLIDE	  = $D01F   ;SPRITE TO BACKGROUND COLLISION
+SPRITE_MCOLOR_0	  = $D025   ;COLOR REGISTER
+SPRITE_MCOLOR_1	  = $D026   ;COLOR REGISTER
+SPRITE_COLOR	  = $D027   ;MAIN SPRITE COLOR +SPRITE NUMBER
+;*--------------------------------
+;* CIA HARDWARE EQUATES
+;*--------------------------------
+PORTA1		  = $DC00
+PORTB1		  = $DC01
+DDRA1		  = $DC02
+DDRB1		  = $DC03
+PORTA2		  = $DD00
+PORTB2		  = $DD01
+DDRA2		  = $DD02
+DDRB2		  = $DD03
+CIA_1_IRQ 	  = $DC0D   ;CIA1 IRQ ENABLE
+CIA_2_IRQ 	  = $DD0D   ;CIA2 IRQ ENABLE
+CIA1_CTRL_A	  = $DC0E   ;CIA1 CONTROL REG A
+CIA1_CTRL_B	  = $DC0F   ;CIA1 CONTROL REG B
+CIA2_CTRL_A	  = $DD0E   ;CIA2 CONTROL REG A
+CIA2_CTRL_B	  = $DD0F   ;CIA2 CONTROL REG B
+;*--------------------------------
+;* AUDIO HARDWARE EQUATES
+;*--------------------------------
+FREQ_1	      = $D400
+FREQ_2	      = $D407
+FREQ_3	      = $D40E
+CONTROL_1     = $D404
+CONTROL_2     = $D40B
+CONTROL_3     = $D412
+ATTDEC_1      = $D405
+ATTDEC_2      = $D40C
+ATTDEC_3      = $D413
+SUSREL_1      = $D406
+SUSREL_2      = $D40D
+SUSREL_3      = $D414
+MASTER_VOLUME = $D418
+;*--------------------------------
+COORD1 .byte 0,0,1,0,255,255,255,1,1,0,0,254
+       .byte 2,255,2,254,1,255,254,1,2,253,1,255
+       .byte 3,3,0,255,253,2,254,2,254,253,1,3,0
+
+COORD2 .byte 0,255,0,1,0,255,1,255,1,2,254,0
+       .byte 0,2,1,1,254,254,255,2,255,1,253,253
+       .byte 255,1,3,3,255,2,2,254,254,0,3,0,253
+
+;*--------------------------------
+PAD_DATA .byte $55,$55,$AA,$F0,$0F,$F0,$0F,$0
+         .byte $0F,$AA,$AA,$F0,$0F,$F0,$0F,$0
+         .byte $0F,$AA,$AA,$FF,$FF,$FF,$FF,$FF
+
+;*--------------------------------
+PAD_COLOR .byte $07,$07		 ; YELLOW
+;*--------------------------------
+PADC_ADR  .byte $E1,$D9
+          .byte $69,$D9
+          .byte $F1,$D8
+
+;*--------------------------------
+COLOR_MEM_LO .byte $06,$DA
+		   .byte $8E,$D9
+		   .byte $16,$D9
+		   .byte $9E,$D8
+;*--------------------------------
+COLOR2_MEM_LO .byte $06,$DA
+		    .byte $8E,$D9
+		    .byte $16,$D9
+		    .byte $9E,$D8
+;* 	    .byte 26D8
+		    .byte $06,$DA
+		    .byte $8E,$D9
+		    .byte $16,$D9
+		    .byte $9E,$D8
+		    .byte $06,$DA
+;*--------------------------------
+SCR_MEM_LO       .byte $08,$42
+		 .byte $90,$41
+		 .byte $18,$41
+		 .byte $A0,$40
+;*--------------------------------
+WATERC_ADR        .byte $80,$42  ;LEVEL 1
+		 .byte $08,$42  ;LEVEL 2
+		 .byte $90,$41  ;LEVEL 3
+		 .byte $18,$41  ;LEVEL 4
+		 .byte $80,$42  ;LEVEL 5
+;*--------------------------------
+WATER_CHECK .byte $28,$50,$78,$A0
+WATER_START .byte $00,$01,$02,$03
+WATER_INDEX .byte $00
+WATER_TOP   .byte $00
+INT_RASTER  .byte $B0,$98,$80,$68
+INT_CPX	    .byte $B6,$9E,$86,$6E
+INT_RASTER2 .byte $DA,$CC
+; Example syntax
+;         lda #<label     ; low byte of address
+;        ldy #>label     ; high byte of address
+INT_ADDRESS:
+    .byte <IRQ2
+    .byte >IRQ2
+    .byte <IRQ3
+    .byte >IRQ3
+
+
+;*--------------------------------
+SPRITE_MASK .byte $01,$02,$04,$08,$10,$20,$40,$80
+;*--------------------------------
+ROCOL	 .word $00
+;EOFS	 .DA#40,#80,#120,#120,#80,#40
+EOFS     .word 40, 80, 120, 120, 80, 40
+;EOFHT	 .DA#2,#4,#6,#6,#4,#2
+EOFHT    .word 2, 4, 6, 6, 4, 2
+DIRT_COLUMN .byte 00
+;*--------------------------------
+BHPO	 .byte 0,0,0,0,0,0
+BHPO_XMSB  .byte 0,0,0,0,0,0
+;*--------------------------------
+B2HPO	 .byte 0,0,0,0,0,0
+B2HPO_XMSB .byte 0,0,0,0,0,0
+;*--------------------------------
+BOFS	 .word 56,106,156
+BNUMBER	 .byte 00
+COLIX	 .byte 0,0,0,1,0,0,0,2,0,0,0,1,0,0
+SCOOFS	 .byte 0,0,0,1,0,2,0,3,0,5,0,6,0,7
+P1LINI	 .byte 0,3,0,3
+P2LINI	 .byte 0,0,0,3
+LIFE1	 .byte 0,0,0,0
+LIFE2	 .byte 0,0,0,0
+PLOTBL	 .byte $C0,$30,$0C,$03
+BUCKSN	 .byte $38,$6C,$44,$F6,$C6,$DE,$44,$6C,$38,$54
+BUSH_LO	 .word BUSH
+BUSH_HI	 .word BUSH
+SCR_LO	 .word SCR
+SCR_HI	 .word SCR
+ATT_LO	 .word ATT
+ATT_HI	 .word ATT
+;*--------------------------------
+DIE_FLAG	 .fill 2
+SURFACE_X  .fill 1
+SCAN_X	 .fill 1
+SCAN_Y	 .fill 1
+DUD	 .fill 1
+START	 .fill 1
+;*--------------------------------
+BLADE_SHAPE .byte $03,$F0,$00,$00,$0F,$C0
+		  .byte $00,$F0,$00,$00,$0F,$00
+		  .byte $00,$30,$00,$00,$0C,$00
+		  .byte $00,$0C,$00,$00,$30,$00
+		  .byte $00,$0F,$00,$00,$F0,$00
+		  .byte $00,$0F,$C0,$03,$F0,$00
+		  .byte $00,$0F,$00,$00,$F0,$00
+		  .byte $00,$0C,$00,$00,$30,$00
+		  .byte $00,$30,$00,$00,$0C,$00
+		  .byte $00,$F0,$00,$00,$0F,$00
+BLADE_TABLE .byte $05,$0B,$11,$17,$1D,$23,$29,$2F,$35,$3B
+SUN_TABLE   .byte $1C,$1D,$1E,$1F,$20,$21
+;*UPDN	  .byte 000000000001FF0000
+;* 	 .byte 01FF000001FF00
+BLDINC	 .word 255
+;*--------------------------------
+BOMDIR	 .byte $FF,$FF,$00,$01,$01
+BOMON	 .byte $03,$0C,$30,$C0
+BOMOFF	 .byte $FC,$F3,$CF,$3F
+;*--------------------------------
+BOMB_SHAPE  .byte $80,$20,$08,$02,$80,$20,$08,$02
+BOMB_MASK   .byte $3F,$CF,$F3,$FC,$3F,$CF,$F3,$FC
+DIRT_COLOR  .byte $C0,$30,$0C,$03,$C0,$30,$0C,$03
+ROCK_COLOR  .byte $C0,$30,$0C,$03,$C0,$30,$0C,$03
+WATER_COLOR .byte $40,$10,$04,$01
+DIRT_TEXTURE .byte $FF,$FF,$FF,$FF,$FF,$FF
+COL0	 .byte $D4,$24,$24,$24,$26,$24,$22,$24
+COL1	 .byte $88,$0F,$0F,$88,$88,$88,$88,$88
+INTDC0	 .byte $72,$86,$A6,$16,$A6,$36,$C6,$78
+INTDC1	 .byte $0A,$34,$24,$76,$14,$94,$08,$A6
+INTDBG	 .byte $00,$80,$80,$00,$00,$00,$00,$00
+SKYC1	 .byte $80
+SKYC2	 .byte $80
+SKYC3	 .byte $80,$00,$00,$00
+WTRC1	 .byte $0F,$0F,$0F,$88,$88,$88
+PC0	 .byte $00,$34,$C4,$00,$00,$00,$00,$00
+P0SIZ	 .byte $00,$01,$00,$00,$00,$00,$00,$00
+SCORE_COLOR .byte $06,$06,$06,$06,$06,$06,$06,$06
+		  .byte $07,$07,$07,$0D,$0D,$0D
+		  .byte $01,$01,$01,$01,$01,$01
+PLNORG	 .byte $55,$01,$00,$00
+PLNLIM	 .byte $00,$00,$60,$01
+;*--------------------------------
+;* SPRITE POINTERS
+;*--------------------------------
+PLN_SHAPE  .byte $15,$16
+GUN_SHAPE  .byte $17,$18,$19,$1A,$1B
+CHOP_SHAPE .byte $10,$11,$12,$13,$14
+PRIZE_SHAPE .byte $25,$26,$27,$28,$29,$2A,$25,$26,$27
+PRIZE_COLOR .byte $0B,$05,$03,$03,$01,$07,$0B,$05,$03
+;*--------------------------------
+OBDATA	 .byte $20,$20,$20,$20,$20,$20,$24,$30
+DRNVOL	 .byte $20,$20,$20,$21,$21,$22,$22,$23,$23,$23,$24,$24,$24
+		 .byte $24,$24,$24,$24,$24,$23,$23,$23,$23,$22,$22,$21,$21,$20
+;*--------------------------------
+LEVEL_MSG      .text "      LEVEL 00      "
+BUC_VALUE_MSG  .text " TREASURE = $2,000  "
+PLAYER_MSG     .text "      PLAYER 1      "
+ONE_PLAYER_MSG .text "    ONE PLAYER      "
+TWO_PLAYER_MSG .text "    TWO PLAYERS     "
+ONE_STICK_MSG  .text "    ONE  STICK      "
+TWO_STICK_MSG  .text "    TWO  STICKS     "
+GAME_OVR_MSG   .text "     GAME  OVER     "
+HI_SCORE_MSG   .text "     HIGH SCORE     "
+;*--------------------------------
+SCORE_ONE      .text "        "
+SCORE_TWO      .text "        "
+SCORE_HI	     .text "        "
+;*--------------------------------
+NAME	     .text "  7 SEPTEMBER 1984  "
+NAME2	     .text "  TO MY DAUGHTER,   "
+NAME3	     .text "< NICHELLE  STYCK > "
+;*--------------------------------
+PLAYER_COLOR .byte $0D,$0A
+PLAYC0	 .byte $8A,$CA
+LCOLRS	 .byte $09,$08,$09,$08,$09,$08,$09,$08,$09,$08,$09,$08
+;*--------------------------------
+;*  SPEED OF FALLING DIRT
+;*--------------------------------
+FALLS	 .word 9,7,5,5,4,4,3,3,3,2,2,2,2
+		 .word 2,2,2,2,2,2,2,2,2,1,1,1
+;*--------------------------------
+SSPDS	 .word 0,4,3,2,3,2,1,2,2,1,1,1,2
+		 .word 2,1,1,1,1,1,1,1,1,2,1,1
+GUNPRS	 .word 0,1,1,1,1,1,1,1,1,1,1,1,1
+		 .word 1,1,1,1,1,1,1,1,1,1,1,1
+GCHANC	 .byte $3F,$06,$05,$04,$04,$04,$04,$04,$03,$03,$03,$02,$01
+		 .byte $03,$03,$02,$02,$03,$03,$03,$02,$01,$01,$02,$01
+;*--------------------------------
+;*  MAX NUMBER OF FALLING DIRT
+;*--------------------------------
+RMAX	 .word 4,5,4,5,4,5,6,4,5,6,7,8,4
+		 .word 5,6,7,7,7,8,8,8,9,7,8,9
+;*--------------------------------
+;* PRIZE VALUES
+;*--------------------------------
+B1VALS	 .word 2,2,2,2,2,3,3,3,3,3,4,4,4
+		 .word 4,4,5,5,5,5,5,6,6,6,6,6,7
+		 .word 7,7,7,7,8,8,8,8,8,9,9,9,9
+B2VALS	 .word 0,2,4,6,8,0,2,4,6,8,0,2,4
+		 .word 6,8,0,2,4,6,8,0,2,4,6,8,0
+		 .word 2,4,6,8,0,2,4,6,8,0,2,4,6
+;*--------------------------------
+PADLOC	 .byte $7E,$66,$4E,$36,$36
+PADLOC2	 .byte $78,$60,$48,$30,$30
+;*--------------------------------
+GROUND	 .byte $80,$68,$50,$38,$38
+BUCADF	 .word 165,145,121,97
+BUCHGT	 .byte $C2,$9A,$32,$6A,$6A
+ICTBL	 .byte $A3,$8B,$73,$5B
+PADLIN	 .word 159,135,111,87
+;*--------------------------------
+SUN_HT	 .byte $42,$42,$42,$42,$42
+SUN_LR	 .byte $30,$30,$30,$30,$30
+;*--------------------------------
+BUC_YPOS	 .byte $CF,$BB,$A0,$8B,$80,$40,$40,$40
+BUC_XPOS	 .byte $50,$C8,$F0,$FF,$A0,$78
+;*--------------------------------
+UWTBL	 .byte $00,$00,$02,$03
+SWTBL	 .byte $00,$00,$01,$02
+SURMIN	 .byte $00,$05,$0A,$10
+SURMAX	 .byte $00,$0A,$10,$14,$16,$18
+UNDER_X	 .byte $14,$1E,$28,$40,$4E,$58,$60
+UNDER_Y	 .byte $08,$10,$15,$08,$10,$15,$08
+UNDMIN	 .byte $04,$07,$09,$0B,$09,$07,$04
+UNDMAX	 .byte $14,$16,$0E,$10,$0E,$16,$14
+;*--------------------------------
+GUNOFF	 .byte $C3
+GUNON	 .byte $3C
+WPXADD	 .word 0,1,255,0,1,2,255,0,1,2,0,1
+WPYADD	 .word 0,0,1,1,1,1,2,2,2,2,3,3
+;*--------------------------------
+STICK_NUMBER  .fill 1
+ABORT	 .fill 1
+ABORT_FLAG .fill 1
+KEYTEMP	 .fill 1
+NAME_FLAG  .fill 1
+SEED	 .fill 1
+CHOP_YTEM  .fill 1
+LANDFG	 .fill 1
+BOMACT	 .fill 1
+BOMBLD	 .fill 1
+BUCHIT	 .fill 1
+;*--------------------------------
+SCOPOS	 .fill 1
+SCOCHG	 .fill 1
+SCOMAX	 .fill 2
+SCOVAL	 .fill 8
+SCOV0	 .fill 2
+SCOV1	 .fill 2
+SCOV2	 .fill 2
+SCOV3	 .fill 2
+SCOV4	 .fill 2
+SCOV5	 .fill 2
+SCOV6	 .fill 2
+SCOV7	 .fill 2
+;*--------------------------------
+PLAYRS	 .fill 1
+SAMEPL	 .fill 1
+LIFHLD	 .fill 1
+EXPCNT	 .fill 1
+PLTCLR	 .fill 1
+COUNTR	 .fill 1
+HIHLD	 .fill 1
+LOHLD	 .fill 1
+PLOTBYT	 .fill 1
+COLOR	 .fill 1
+DROP1	 .fill 1
+DROP2	 .fill 1
+HOLD1	 .fill 1
+DRPCOL	 .fill 1
+DRPFLG	 .fill 1
+ROCNT	 .fill 1
+BSX	 .fill 1
+BSY	 .fill 1
+IRQ_BSX	 .fill 1
+IRQ_BSY	 .fill 1
+SHOB1	 .fill 1
+SHOB2	 .fill 1
+SHOB3	 .fill 1
+MOVED	 .fill 1
+MOVED2	 .fill 1
+HT	 .fill 1
+EOFSET	 .fill 1
+XPOS	 .fill 21
+YPOS	 .fill 21
+CNT	 .fill 21
+;*--------------------------------
+RX1	 .fill 11
+RX2	 .fill 11
+RX3	 .fill 11
+RX4	 .fill 11
+RX5	 .fill 11
+RX6	 .fill 11
+;*--------------------------------
+RY1	 .fill 11
+RY2	 .fill 11
+RY3	 .fill 11
+RY4	 .fill 11
+RY5	 .fill 11
+RY6	 .fill 11
+;*--------------------------------
+KILL_DIRT_FLAG .fill 11
+;*--------------------------------
+LRIND	 .byte 00
+EXPHT	 .byte 0,0,0,0,0,0,0,0,0,0,0,0
+EXPLR	 .byte 0,0,0,0,0,0,0,0,0,0,0,0
+EXPGO	 .byte 0,0,0,0,0,0,0,0,0,0,0,0
+BOMB	 .byte 0,0,0,0,0,0,0,0
+BOMBHT	 .byte 0,0,0,0,0,0,0,0
+BOMBLR	 .byte 0,0,0,0,0,0,0,0
+BOMBDR	 .byte 0,0,0,0,0,0,0,0
+;*--------------------------------
+BOMB_CNT_VAL  .byte 9,5,1,5,9
+;*--------------------------------
+BOMB_YINC  .byte 1,2,1,2,1
+BOMB_YDEL  .fill 5
+HP0	 .fill 8
+DRTHIT	 .fill 1
+NOUPDT	 .fill 1
+BOMBCT	 .fill 4
+BOMTIM	 .fill 4
+TRANSIT	 .fill 1
+PLNDIR	 .fill 1
+CHOP_DIR	 .fill 1
+CLOUD_DIR  .fill 1
+CLOUD_FG	 .fill 1
+ABCNT	 .fill 1
+ABONUM	 .fill 1
+SCOLIN	 .fill 20
+;*--------------------------------
+DEMO	 .fill 1
+DEWAIT	 .fill 1
+LETTER	 .fill 1
+;*--------------------------------
+NPWAIT	 .fill 1
+;*--------------------------------
+LAND_SOUND .fill 1
+LAND_FREQ  .fill 1
+BUC_SOUND  .fill 1
+;*--------------------------------
+ABOFRQ	   .fill 1
+EXPL_FREQ    .fill 1
+EXPL_SOUND   .fill 1
+SPLASH_SOUND .fill 1
+PLANE_SOUND  .fill 1
+SHOT_SOUND   .fill 1
+;*--------------------------------
+PRSCNT	 .fill 1
+BOMIND	 .fill 1
+BDIG1	 .fill 1
+BDIG2	 .fill 1
+NEWLFG	 .fill 1
+BBRITE	 .fill 1
+M2IX	 .fill 1
+INEXPC	 .fill 1
+SHOLTR	 .fill 1
+INBRIT	 .fill 1
+BFXHLD	 .fill 1
+;*--------------------------------
+EXPBGC	 .fill 1
+TEMPCX	 .fill 1
+;*--------------------------------
+;* COLORS
+;*--------------------------------
+BLACK		  = $00
+WHITE		  = $01
+RED		  = $02
+CYAN		  = $03
+PURPLE		  = $04
+GREEN		  = $05
+BLUE		  = $06
+YELLOW		  = $07
+ORANGE		  = $08
+BROWN		  = $09
+LT_RED		  = $0A
+DK_GREY		  = $0B
+MED_GREY		  = $0C
+LT_GREEN		  = $0D
+LT_BLUE		  = $0E
+LT_GREY		  = $0F
+;*--------------------------------
+IRQLO		  = $314
+IRQHI		  = $315
+NMI_VECTOR	  = $318
+;*--------------------------------
+;* ZERO PAGE VARIABLES
+;*--------------------------------
+* = $05
+PAUSE	.fill 1
+CHOP_X	.fill 1
+CHOP_XMSB .fill 1
+PLANE_X	.fill 1
+PLANE_XMSB .fill 1
+GUN_X	.fill 1
+GUN_XMSB	.fill 1
+CLOUD_X	.fill 1
+CLOUD_XMSB .fill 1
+SUN_X	.fill 1
+SUN_XMSB	.fill 1
+EXTRA_X	.fill 1
+EXTRA_XMSB .fill 1
+EXTRA1_X	.fill 1
+EXTRA1_XMSB .fill 1
+EXTRA2_X	.fill 1
+EXTRA2_XMSB .fill 1
+;*--------------------------------
+BUC1_X	.fill 1
+BUC1_XMSB .fill 1
+BUC2_X	.fill 1
+BUC2_XMSB .fill 1
+BUC3_X	.fill 1
+BUC3_XMSB .fill 1
+;*--------------------------------
+CHOP_Y	.fill 1
+PLANE_Y	.fill 1
+GUN_Y	.fill 1
+CLOUD_Y	.fill 1
+SUN_Y	.fill 1
+EXTRA_Y	.fill 1
+EXTRA1_Y	.fill 1
+EXTRA2_Y	.fill 1
+;*--------------------------------
+BUC1_Y	.fill 1
+BUC2_Y	.fill 1
+BUC3_Y	.fill 1
+;*--------------------------------
+GUN_X_SC	.fill 1
+GUN_Y_SC	.fill 1
+CHOP_XSC	.fill 1
+CHOP_YSC	.fill 1
+;*--------------------------------
+MOUNTAIN_TOP .fill 1
+;*--------------------------------
+CHOP_TIM	.fill 1
+PLANE_TIM .fill 1
+BLADE_TIM .fill 1
+CLOUD_TIM .fill 1
+SUN_TIM	.fill 1
+GUN_TIM	.fill 1
+CHOP_SPEED .fill 1	;USED TO SET CHOP_TIM
+BOMB_SPEED .fill 1
+BLADE_SPEED .fill 1	;CONTROLS BLADE SOUND
+BLADE_SPEED2 .fill 1
+BLADE_SOUND .fill 1	;=1 NO SOUND
+CHOP_POS	.fill 1	;INDEX TO TABLE OF CHOPPER MOVEMENTS
+CHOP_EXPL .fill 1	;FLAG IF CHOP EXPLODING
+BHIT1	.fill 1
+BHIT2	.fill 1
+BHIT3	.fill 1
+BHIT4	.fill 1
+HIT0	.fill 1
+HIT1	.fill 1
+HIT2	.fill 1
+HIT3	.fill 1
+SPRITE_COLLISION .fill 1
+CHOP_BACK_COLL   .fill 1
+;*--------------------------------
+BLDPH	.fill 1
+SUNPH	.fill 1
+BODPH	.fill 1
+;*--------------------------------
+ROTATE_LEFT .fill 1
+ROTATE_RIGHT .fill 1
+;*--------------------------------
+CHOPT	.fill 1
+STKIND	.fill 1
+INCUD	.fill 1
+INCLR	.fill 1
+COUNT	.fill 1
+ROTGT	.fill 1
+ROTINC	.fill 1
+DROPWT	.fill 1
+DROPGO	.fill 1
+FERRY	.fill 1
+FERIX	.fill 1
+LEVEL	.fill 2
+BILEVL	.fill 1
+LIVES	.fill 2
+BUCHPC	.fill 1
+BUCHPC_XMSB .fill 1
+BUCVPC	.fill 1
+TURNO	.fill 1
+CKTDIR	.fill 1
+BUCTRY	.fill 1
+BUC_NUM	.fill 1	; BNUMBR
+;*PLRSIX	 .fill 1
+;*OTSIND	 .fill 1
+BUCADD	.fill 1
+BUCLVL	.fill 1
+BUCVL1	.fill 1
+BUCVL2	.fill 1
+PADLVL	.fill 1
+PADLVL2	.fill 1
+INILVL	.fill 1
+FALSPD	.fill 1
+INICHT	.fill 1
+PADLN	.fill 1
+INIFLG	.fill 1
+GPFLG	.fill 1
+SHTSPD	.fill 1
+GUNCHN	.fill 1
+ROCMAX	.fill 1
+TRANCT	.fill 1
+CHANGP	.fill 1
+;*--------------------------------
+UNDWTR	.fill 1
+SURWTR	.fill 1
+SURTMP	.fill 1
+DEPTH	.fill 1
+WTRLIN	.fill 1
+WTRLFT	.fill 1
+WTRLEN	.fill 1
+UNDTMP	.fill 1
+MINDEP	.fill 1
+UNDFAC	.fill 1
+TYPE2	.fill 1
+WATERX	.fill 1
+WATERY	.fill 1
+WPHASE	.fill 1
+;*--------------------------------
+GUNACT	.fill 1
+GUNFAL	.fill 1
+GUNFGO	.fill 1
+GUNSHT	.fill 1
+GUN_LAND	.fill 1
+GUN_PHASE .fill 1
+;*--------------------------------
+TGTX	.fill 1
+TGTY	.fill 1
+SHOTX	.fill 1
+SHOTY	.fill 1
+SHOTON	.fill 1
+SHOTDR	.fill 1
+;*PRVDAT	 .fill 1
+;*--------------------------------
+PRIZE_1	.fill 1
+PRIZE_2	.fill 1
+PRIZE_3	.fill 1
+PRIZE_1C	.fill 1
+PRIZE_2C	.fill 1
+PRIZE_3C	.fill 1
+;*--------------------------------
+PXINCH	.fill 1
+PXINCL	.fill 1
+PYINCH	.fill 1
+PYINCL	.fill 1
+PXHOLD	.fill 1
+PYHOLD	.fill 1
+DELTAX	.fill 1
+DELTAY	.fill 1
+SXHLDA	.fill 1
+;*INTCNT	 .fill 1
+WLO	.fill 1
+WHI	.fill 1
+SOIL	.fill 1
+PADC_LO	.fill 1
+PADC_HI	.fill 1
+PADLO	.fill 1
+PADHI	.fill 1
+LO	.fill 2
+IRQ_LO	.fill 2
+JLO	.fill 2
+IRQ_JLO	.fill 2
+OLD_LO	.fill 8
+OLD_BOMB	.fill 4
+INDEX_MASK .fill 4
+ERASE_FLAG .fill 4
+ROTATE_FLAG .fill 1
+;*--------------------------------
+BUC1VP	.fill 1
+BUC2VP	.fill 1
+BUC3VP	.fill 1
+;*--------------------------------
+B2C1VP	.fill 1
+B2C2VP	.fill 1
+B2C3VP	.fill 1
+;*--------------------------------
+PLOTX	.fill 1
+PLOTY	.fill 1
+IRQ_PLOTX .fill 1
+IRQ_PLOTY .fill 1
+;*SPLCNT	 .fill 1
+BDEAD	.fill 1
+DEAD	.fill 1
+DRPNUM	.fill 1
+PLAYER	.fill 1
+RANDOM	.fill 1
+BOMB_COUNT .fill 1
+BOMB_CNT	.fill 4
+TABLE_LO	.fill 8
+;*--------------------------------
+TEMP1	.fill 1			;GENERAL PURPOSE VARIABLE
+TEMP2	.fill 1			;GENERAL PURPOSE VARIABLE
+TEMP3	.fill 1			;GENERAL PURPOSE VARIABLE
+TEMP4	.fill 1			;GENERAL PURPOSE VARIABLE
+TEMP5	.fill 1			;GENERAL PURPOSE VARIABLE
+TEMP6	.fill 1			;GENERAL PURPOSE VARIABLE
+TEMP7	.fill 1			;GENERAL PURPOSE VARIABLE
+STICK_FLAG .fill 1
+STICK_TMP .fill 1
+WATER_TEMP .fill 1
+;*--------------------------------
+IRQ_TEMP1 .fill 1
+IRQ_TEMP2 .fill 1
+IRQ_TEMP3 .fill 1
+IRQ_TEMP4 .fill 1
+IRQ_TEMP5 .fill 1
+IRQ_TEMP6 .fill 1
+;*--------------------------------
+MULT1	.fill 1			;USED BY MULTIPLICATION ROUTINE
+MULT2	.fill 1
+MULTIPLIER .fill 1
+;*--------------------------------
+DIVISOR	.fill 1			;USED BY DIVISION ROUTINE
+DIVIDEND	.fill 1
+REMAINDER .fill 1
+;*--------------------------------
+PRINTX	.fill 1			;USED BY PRINT ROUTINE
+PRINTY	.fill 1
+PRINT_COLOR .fill 1
+;*--------------------------------
+TIMER1	.fill 1
+TIMER2	.fill 1
+TIMER3	.fill 1
+TIMER4	.fill 1
+TIMER5	.fill 1
+TIMER6	.fill 1
+TIMER7	.fill 1
+TIMER8	.fill 1
+TIMER9	.fill 1
+;*--------------------------------

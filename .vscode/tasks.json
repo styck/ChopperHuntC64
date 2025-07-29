@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build with 64tass",
+      "type": "shell",
+      "command": "64tass",
+"args": [
+        "${file}",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}.prg",
+        "-L",
+        "${fileDirname}/listing.txt",
+        "--line-numbers",
+        "--verbose-list",
+        "--vice-labels",
+        "-l",
+        "${fileDirname}/labels.txt"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run in VICE",
+      "type": "shell",
+      "command": "C:/Users/styck/AtariC64/WinVice/GTK3VICE-3.7-win64/bin/x64sc.exe",
+      "args": ["${fileDirname}/${fileBasenameNoExtension}.prg"],
+      "dependsOn": "Build with 64tass"
+    }
+  ]
+}

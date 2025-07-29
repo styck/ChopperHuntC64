@@ -1,30 +1,31 @@
- 1000 *--------------------------------
- 1010 * SAVE CHOPPER HUNT
- 1020 * (C) 1984 IMAGIC
- 1030 * BY APPLIED COMPUTER TECHNOLOGY
- 1040 *--------------------------------
- 1050 *      .TI 55,CHOPPER HUNT C-64
- 1060	     .LIS OFF
- 1070	     .IN CHOP.MACROS,D2
- 1080	     .IN CHOP.EQUATES,D1
- 1090	     .IN CHOP.SHAPES,D2
- 1100	     .IN CHOP.CODE.1,D2
- 1110	     .IN CHOP.CODE.3,D2
- 1120	     .IN CHOP.CODE.5,D2
- 1130	     .IN CHOP.CODE.4,D2
- 1140	     .IN CHOP.CODE.2,D2
- 1150	     .IN DO.DIRT.CODE,D2
- 1160	     .IN IRQ.CODE,D2
- 1170	     .IN BOMB.CODE,D2
- 1180	     .IN EXPLOSION.CODE,D2
- 1190	     .IN DIRT.BOMB.CODE,D2
- 1200	     .IN SOUND.CODE2,D1
- 1210	     .IN GUN.CHANCE.CODE,D1
- 1220	     .IN GUN.CODE.1,D2
- 1230	     .IN GUN.CODE.2,D2
- 1240	     .IN GUN.CODE.3,D2
- 1250	     .IN GUN.CHECK.CODE,D1
- 1260	     .IN PRINT.INTRM,D2
- 1270	     .IN GAME.OVER.CODE
- 1280	     .EN
-
+* = $0801
+.byte $0c, $08, $0a, $00, $9e, $20, $32, $30, $34, $38, $00, $00, $00
+* = $0800  ; Your program’s original start address
+
+;--------------------------------
+; SAVE CHOPPER HUNT
+; (C) 1984 IMAGIC
+; BY APPLIED COMPUTER TECHNOLOGY
+;--------------------------------
+    
+    .include "CHOPMAC.ASM"
+    .include "CHOPCOD1.ASM"
+    .include "CHOPCOD2.ASM"
+    .include "CHOPCOD3.ASM"
+    .include "CHOPCOD4.ASM"
+    .include "CHOPCOD5.ASM"
+    .include "IRQ.ASM"
+    .include "DODIRT.ASM"
+    .include "BOMB.ASM"
+    .include "EXPLODE.ASM"
+    .include "DIRTBOMB.ASM"
+    .include "SOUND.ASM"
+    .include "GUNCHANC.ASM"
+    .include "GUNCOD1.ASM"
+    .include "GUNCOD2.ASM"
+    .include "GUNCOD3.ASM"
+    .include "GUNCHECK.ASM"
+    .include "PRTINTRM.ASM"
+    .include "GAMEOVER.ASM"
+    .include "CHOPEQU.ASM"
+    .include "SHAPES.ASM"

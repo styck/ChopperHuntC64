@@ -1,561 +1,534 @@
- 1000 *--------------------------------
- 1010 * SAVE CHOP.CODE.4
- 1020 *--------------------------------
- 1030 * INITIALIZE HARDWARE REGISTERS
- 1040 *--------------------------------
- 1050 INIT.HARDWARE	  LDA DDRA2
- 1060			  ORA #$03	  SELECT VIDEO BANK
- 1070			  STA DDRA2
- 1080			  JSR CREATE.WIDEFONT
- 1090			  RTS
- 1100 *--------------------------------
- 1110 * SETUP TEXT SCREEN
- 1120 *--------------------------------
- 1130 SETUP.TEXT LDA PORTA2
- 1140		 AND #$FC
- 1150		 ORA #$02	 SELECT BANK 1
- 1160		 STA PORTA2	 $4000-$8000
- 1170		 LDA VIC.CONTROL.1   TURN OFF HIRES
- 1180		 AND #223
- 1190		 STA VIC.CONTROL.1
- 1200		 LDA VIC.CONTROL.2
- 1210		 AND #239
- 1220		 STA VIC.CONTROL.2
- 1230		 LDA #$06	 SETUP POINTER TO CHARACTER SET
- 1240		 STA VIC.MEMORY  AND SCREEN MEMORY
- 1250		 RTS
- 1260 *--------------------------------
- 1270 * SETUP MULTICOLOR SCREEN
- 1280 *--------------------------------
- 1290 SETUP.HIRES	  LDA PORTA2
- 1300			  AND #$FC
- 1310			  ORA #$02
- 1320			  STA PORTA2
- 1330			  LDA #$08
- 1340			  STA VIC.MEMORY
- 1350			  LDA VIC.CONTROL.1
- 1360			  ORA #32
- 1370			  STA VIC.CONTROL.1
- 1380			  LDA VIC.CONTROL.2
- 1390			  ORA #16
- 1400			  STA VIC.CONTROL.2
- 1410			  RTS
- 1420 *--------------------------------
- 1430 * INIT IRQ1
- 1440 *--------------------------------
- 1450 INIT.IRQS LDA #IRQ1	INITIALIZE IRQ LOCATION
- 1460		STA IRQLO	TO POINT TO FIRST CHARACTER
- 1470		LDA /IRQ1
- 1480		STA IRQHI
- 1490		LDA #NMI
- 1500		STA NMI.VECTOR
- 1510		LDA /NMI
- 1520		STA NMI.VECTOR+1
- 1530 *--------------------------------
- 1540		LDA #$00
- 1550		STA RASTER
- 1560 .1	LDA VIC.CONTROL.1
- 1570		BPL .1			SYNC VBLANK!
- 1580		LDA #$01
- 1590		STA IRQ.ENABLE
- 1600		RTS
- 1610 *--------------------------------
- 1620 * INITIALIZE.GAME
- 1630 *--------------------------------
- 1640 INIT.GAME LDA #$07
- 1650		STA VIC.CONTROL.1
- 1660		LDA #$07
- 1670		STA VIC.CONTROL.2
- 1680		LDA #$00
- 1690		STA INCUD
- 1700		STA INCLR
- 1710 *-------------------------------
- 1720 * INITIALIZE SPRITES
- 1730 *--------------------------------
- 1740		LDA #$12
- 1750		STA SPRITE.POINTER   POINT TO CHOPPER
- 1760		LDA #$16
- 1770		STA SPRITE.POINTER+1 POINT TO PLANE
- 1780		LDA #$17
- 1790		STA SPRITE.POINTER+2 POINT TO SMART BOMB
- 1800		LDA #$24
- 1810		STA SPRITE.POINTER+3 POINT TO CLOUD
- 1820		LDA #$1C
- 1830		STA SPRITE.POINTER+4 POINT TO SUN
- 1840		LDA #$23
- 1850		STA SPRITE.POINTER+5 POINT TO BUCK1
- 1860		LDA #$2D
- 1870		STA SPRITE.POINTER+6 POINT TO GUN BULLET
- 1880 *--------------------------------
- 1890		LDA #LT.GREEN
- 1900		STA SPRITE.COLOR
- 1910		LDA #BLACK
- 1920		STA SPRITE.MCOLOR.0
- 1930		LDA #WHITE
- 1940		STA SPRITE.MCOLOR.1
- 1950		STA SPRITE.COLOR+2
- 1960		STA SPRITE.COLOR+3
- 1970		LDA #YELLOW
- 1980		STA SPRITE.COLOR+4
- 1990		STA SPRITE.COLOR+5
- 2000		LDA #$10
- 2010		STA SPRITE.PRIORITY
- 2020		LDA #$00
- 2030		STA SPRITE.XXPAND
- 2040		LDA #$67	       CHOP,PLANE,DUMP,BUCS
- 2050		STA SPRITE.MULTI.COLOR
- 2060		LDA #$FF
- 2070		STA SPRITE.ENABLE
- 2080		LDX #$00
- 2090		TXA		    ZERO OUT SPRITE
- 2100 .1	STA CHOP.X,X	    SHADOW REGISTERS
- 2110		INX
- 2120		CPX #$1A
- 2130		BNE .1
- 2140		STA TRANSIT
- 2150		STA HIT0
- 2160		STA SPRITE.XMSB
- 2170		LDY #$03
- 2180 .2	STA BOMB,Y
- 2190		STA OLD.BOMB,Y
- 2200		STA EXPGO,Y
- 2210		STA TABLE.LO,Y
- 2220		STA TABLE.LO+1,Y
- 2230		DEY
- 2240		BNE .2
- 2250		RTS
- 2260 *--------------------------------
- 2270 *  INIT I.O SYSTEM
- 2280 *--------------------------------
- 2290 INIT.IO	 LDA #$7F	  INITIALIZE CIA'S ETC.
- 2300		 STA CIA.1.IRQ
- 2310		 STA CIA.2.IRQ
- 2320		 STA PORTA1
- 2330		 LDA #$08
- 2340		 STA CIA1.CTRL.A
- 2350		 STA CIA2.CTRL.A
- 2360		 STA CIA1.CTRL.B
- 2370		 STA CIA2.CTRL.B
- 2380		 LDX #$00
- 2390		 STX DDRB1
- 2400		 STX DDRB2
- 2410		 STX $D418
- 2420		 DEX
- 2430		 STX DDRA1
- 2440		 LDA #$07
- 2450		 STA PORTA2
- 2460		 LDA #$3F
- 2470		 STA DDRA2
- 2480		 LDA #$E7
- 2490		 STA $01
- 2500		 LDA #$2F
- 2510		 STA $00
- 2520		 RTS
- 2530 *--------------------------------
- 2540 *  READ JOYSTICK DATA IN ACC
- 2550 *--------------------------------
- 2560 READ.STICKS LDA STICK.NUMBER
- 2570		  BNE .1
- 2580 *--------------------------------
- 2590		  LDA PORTB1
- 2600		  AND #$1F
- 2610		  RTS
- 2620 *--------------------------------
- 2630 .1	  LDA PLAYER
- 2640		  BNE .2
- 2650 *--------------------------------
- 2660		 LDA PORTB1
- 2670		 AND #$1F
- 2680		 RTS
- 2690 *--------------------------------
- 2700 .2	 LDA PORTA1
- 2710		 AND #$1F
- 2720		 RTS
- 2730 *--------------------------------
- 2740 * CREATE WIDEFONT
- 2750 *--------------------------------
- 2760 CREATE.WIDEFONT	  >BUILD CHARACTER.MEMORY,TEMP1     POINTER TO YOUR CSET
- 2770			  >BUILD $D800,TEMP3	     POINT TO CSET TO WIDEFONT FROM!
- 2780			  LDA $01		       BANK IN CHARACTER ROM!
- 2790			  AND #251
- 2800			  STA $01
- 2810 STRETCH		  LDY #$07		NUMBER OF CHARACTER LINES!
- 2820 .3		  LDA (TEMP3),Y 	GET BYTE TO WIDEN
- 2830			  PHA
- 2840			  LDX #$04		TIMES TO SHIFT
- 2850 .1		  ROL
- 2860			  PHP
- 2870			  ROL TEMP5
- 2880			  PLP
- 2890			  ROL TEMP5
- 2900			  DEX
- 2910			  BNE .1
- 2920			  LDA TEMP5		SAVE WIDENED CHARACTER
- 2930			  STA (TEMP1),Y
- 2940			  PLA
- 2950			  LDX #$04
- 2960 .2		  ROR
- 2970			  PHP
- 2980			  ROR TEMP5
- 2990			  PLP
- 3000			  ROR TEMP5
- 3010			  DEX
- 3020			  BNE .2
- 3030			  TYA
- 3040			  PHA
- 3050			  CLC
- 3060			  ADC #$08
- 3070			  TAY
- 3080			  LDA TEMP5
- 3090			  STA (TEMP1),Y   SAVE RIGHT HALF OF WIDE CHAR
- 3100			  PLA
- 3110			  TAY
- 3120			  DEY
- 3130			  BPL .3
- 3140 *--------------------------------
- 3150 INC.ADRESS	  LDA TEMP1
- 3160			  CLC
- 3170			  ADC #$10
- 3180			  STA TEMP1
- 3190			  BCC .1
- 3200			  INC TEMP2
- 3210 .1		  LDA TEMP3
- 3220			  CLC
- 3230			  ADC #$08
- 3240			  STA TEMP3
- 3250			  BCC .2
- 3260			  INC TEMP4
- 3270 .2		  LDA TEMP3
- 3280			  CMP #$DC00
- 3290			  BNE STRETCH
- 3300			  LDA TEMP4
- 3310			  CMP /$DC00
- 3320			  BNE STRETCH
- 3330			  LDA $01		       BANK I/O BACK IN
- 3340			  ORA #$04
- 3350			  STA $01
- 3360			  RTS
- 3370 *--------------------------------
- 3380 * CLEAR TEXT SCREEN
- 3390 *--------------------------------
- 3400 CLEAR.SCREEN	  LDX #$00	  CLEAR SCREEN RAM
- 3410 .1		  LDA #$61
- 3420			  STA SCREEN.MEMORY,X
- 3430			  STA SCREEN.MEMORY+$100,X
- 3440			  STA SCREEN.MEMORY+$200,X
- 3450			  STA SCREEN.MEMORY+$2F7,X
- 3460			  LDA #$09
- 3470			  STA COLOR.MEMORY,X  ALSO COLOR MEM..
- 3480			  STA COLOR.MEMORY+$100,X
- 3490			  STA COLOR.MEMORY+$200,X
- 3500			  STA COLOR.MEMORY+$2F7,X
- 3510			  INX
- 3520			  BNE .1
- 3530			  RTS
- 3540 *--------------------------------
- 3550 CLEAR.TEXT LDX #$00
- 3560 .1	 LDA #$40
- 3570		 STA SCREEN.MEMORY,X
- 3580		 STA SCREEN.MEMORY+$100,X
- 3590		 STA SCREEN.MEMORY+$200,X
- 3600		 STA SCREEN.MEMORY+$2F7,X
- 3610		 LDA #$00
- 3620		 STA COLOR.MEMORY,X
- 3630		 STA COLOR.MEMORY+$100,X
- 3640		 STA COLOR.MEMORY+$200,X
- 3650		 STA COLOR.MEMORY+$2F7,X
- 3660		 INX
- 3670		 BNE .1
- 3680		 RTS
- 3690 *--------------------------------
- 3700 INIT.CM	 LDA #$00
- 3710		 STA TEMP3  COLOR FLAG
- 3720 *--------------------------------
- 3730		 LDA BILEVL
- 3740		 AND #$07
- 3750		 ASL
- 3760		 TAX
- 3770 *--------------------------------
- 3780		 LDA COLOR2.MEM.LO,X   TOP LIMITS
- 3790		 STA TEMP5	       FOR THIS LEVEL
- 3800		 LDA COLOR2.MEM.LO+1,X
- 3810		 STA TEMP6
- 3820 *--------------------------------
- 3830		 LDA #$DB	       BOTTOM
- 3840		 STA LO+1	       OF DIRT
- 3850		 LDA #$6F
- 3860		 STA LO
- 3870 *--------------------------------
- 3880		 LDY #$00
- 3890 *--------------------------------
- 3900 .3	 LDA #$00
- 3910		 STA TEMP1  # OF BYTES PER LEVEL
- 3920		 STA TEMP2
- 3930 *--------------------------------
- 3940		 LDA TEMP3
- 3950		 AND #$03
- 3960		 TAX
- 3970 *--------------------------------
- 3980		 LDA LCOLRS,X
- 3990		 STA TEMP4
- 4000 *--------------------------------
- 4010		 INC TEMP3    INDEX TO NEXT COLOR
- 4020 *--------------------------------
- 4030 .2	 LDA TEMP4
- 4040		 STA (LO),Y
- 4050 *--------------------------------
- 4060		 LDA LO
- 4070		 BNE .11      SEE PG.82
- 4080		 DEC LO+1     OF SUB BOOK
- 4090 .11	 DEC LO
- 4100 *--------------------------------
- 4110 .1	 LDA LO+1
- 4120		 CMP TEMP6
- 4130		 BNE .4
- 4140		 LDA LO
- 4150		 CMP TEMP5
- 4160		 BEQ .5
- 4170 *--------------------------------
- 4180 .4	 INC TEMP1
- 4190		 LDA TEMP1
- 4200		 CMP #$78
- 4210		 BNE .2
- 4220 *--------------------------------
- 4230		 JMP .3
- 4240 .5	 >PRINT 0,22,BLACK,"                    "
- 4250		 RTS
- 4260 *--------------------------------
- 4270 *  CLEAR HI-RES SCREEN
- 4280 *--------------------------------
- 4290 CLEAR.HIRES	  LDX #$00
- 4300 .1		  LDA #$00
- 4310			  STA HIRES,X
- 4320			  STA HIRES+$100,X
- 4330			  STA HIRES+$200,X
- 4340			  STA HIRES+$300,X
- 4350			  STA HIRES+$400,X
- 4360			  STA HIRES+$500,X
- 4370			  STA HIRES+$600,X
- 4380			  STA HIRES+$700,X
- 4390			  STA HIRES+$800,X
- 4400			  STA HIRES+$900,X
- 4410			  STA HIRES+$A00,X
- 4420			  STA HIRES+$B00,X
- 4430			  STA HIRES+$C00,X
- 4440			  STA HIRES+$D00,X
- 4450			  STA HIRES+$E00,X
- 4460			  STA HIRES+$F00,X
- 4470			  STA HIRES+$1000,X
- 4480			  STA HIRES+$1100,X
- 4490			  STA HIRES+$1200,X
- 4500			  STA HIRES+$1300,X
- 4510			  STA HIRES+$1400,X
- 4520			  STA HIRES+$1500,X
- 4530			  STA HIRES+$1600,X
- 4540			  STA HIRES+$1700,X
- 4550			  STA HIRES+$1800,X
- 4560			  STA HIRES+$1900,X
- 4570			  STA HIRES+$1A00,X
- 4580			  STA HIRES+$1B00,X
- 4590			  STA HIRES+$1C00,X
- 4600			  STA HIRES+$1D00,X
- 4610			  STA HIRES+$1E00,X
- 4620			  STA HIRES+$1F00,X
- 4630			  INX
- 4640			  BNE .1
- 4650			  JSR CLEAR.SCREEN
- 4660			  RTS
- 4670 *--------------------------------
- 4680 * PRINT ROUTINE
- 4690 * ENTER WITH X=XCOOR Y=YCOOR
- 4700 * PRINT.COLOR=COLOR
- 4710 *--------------------------------
- 4720 PRINT		  STX PRINTX
- 4730			  PLA
- 4740			  CLC
- 4750			  ADC #$01
- 4760			  STA TEMP1
- 4770			  PLA
- 4780			  ADC #$00
- 4790			  STA TEMP2
- 4800			  STY MULT1
- 4810			  LDA #$28
- 4820			  STA MULT2
- 4830			  JSR MULTIPLY	    MULTIPLY Y*40 COLUMN!
- 4840			  LDA PRINTX
- 4850			  CLC
- 4860			  ADC MULT1
- 4870			  STA MULT1
- 4880			  LDA /SCREEN.MEMORY
- 4890			  ADC MULT2
- 4900			  STA MULT2
- 4910 *--------------------------------
- 4920			  LDY #$00
- 4930 PRINT1		  LDA (TEMP1),Y
- 4940			  >INC TEMP1
- 4950 PRINT2		  CMP #$FF
- 4960			  BNE PRINT3
- 4970			  JMP (TEMP1)	RETURN TO  CALLING ROUTINE!
- 4980 PRINT3		  ASL
- 4990			  STA (MULT1),Y
- 5000			  CLC
- 5010			  ADC #$01
- 5020			  INY
- 5030			  STA (MULT1),Y
- 5040			  LDA MULT1
- 5050			  STA TEMP3
- 5060			  LDA MULT2
- 5070			  CLC
- 5080			  ADC /COLOR.MEMORY-SCREEN.MEMORY
- 5090			  STA TEMP4
- 5100			  LDA PRINT.COLOR
- 5110			  STA (TEMP3),Y
- 5120			  DEY
- 5130			  STA (TEMP3),Y
- 5140			  LDA MULT1
- 5150			  CLC
- 5160			  ADC #$02
- 5170			  STA MULT1
- 5180			  BCC PRINT1
- 5190			  INC MULT2
- 5200			  JMP PRINT1
- 5210 *--------------------------------
- 5220 * MULTIPLICATION ROUTINE
- 5230 * ENTER WITH MULT1 & MULT2
- 5240 * RETURNS 16 BIT RESULT IN MULT 1 & 2
- 5250 * DESTROYS A,X
- 5260 *--------------------------------
- 5270 MULTIPLY		  LDA #$00
- 5280			  LDX #$08
- 5290 .1		  LSR MULT1
- 5300			  BCC .2
- 5310			  CLC
- 5320			  ADC MULT2
- 5330 .2		  ROR
- 5340			  ROR MULTIPLIER
- 5350			  DEX
- 5360			  BNE .1
- 5370			  STA MULT2
- 5380			  LDA MULTIPLIER
- 5390			  STA MULT1
- 5400			  RTS
- 5410 *--------------------------------
- 5420 * DIVISION ROUTINE
- 5430 * DIVIDES UNSIGNED BINARY DIVIDEND
- 5440 * IN (DIVIDEND) BY UNSIGNED DIVISOR
- 5450 * IN (DIVISOR). QUOTIENT IS RETURNED
- 5460 * IN (DIVIDEND), AND REMAINDER IN
- 5470 * (REMAINDER)
- 5480 * DESTROYS A,X,Y
- 5490 *--------------------------------
- 5500 DIVIDE		  LDA #$00
- 5510			  STA REMAINDER 	       CLEAR REMAINDER
- 5520			  STA REMAINDER+1
- 5530 *--------------------------------
- 5540			  LDX #16		       DIVIDEND BIT COUNT =16
- 5550 NXTBIT		  ASL DIVIDEND		       SHIFT DIVIDEND/QUOTIENT LEFT
- 5560			  ROL DIVIDEND+1
- 5570			  ROL REMAINDER
- 5580			  ROL REMAINDER+1	       SHIFT PARTIAL DIVIDEND LEFT
- 5590			  LDA REMAINDER
- 5600			  SEC
- 5610			  SBC DIVISOR		       SUBTRACT LOW BYTES
- 5620			  TAY			       SAVE RESULT IN Y
- 5630			  LDA REMAINDER+1
- 5640			  SBC DIVISOR+1 	       SUBTRACT THE HIGH BYTES
- 5650			  BCC CNTDN		       DIVISOR > DIVIDEND?
- 5660			  INC DIVIDEND		       NO. SET BIT IN QUOTIENT
- 5670			  STA REMAINDER+1	       ENTER SUBTRACTION RESULT
- 5680			  TYA			       INTO PARTIAL DIVIDEND
- 5690			  STA REMAINDER
- 5700 CNTDN		  DEX			       LOOP FOR 16 BITS!
- 5710			  BNE NXTBIT
- 5720			  RTS
- 5730 *--------------------------------
- 5740 * SCAN KEYBOARD! IGNORE JOYSTICK
- 5750 * ENTER A=MASK BIT AND Y=STROBE SETUP
- 5760 *--------------------------------
- 5770 KEY.SCAN		  STA KEYTEMP
- 5780			  LDA #$FF
- 5790			  STA DDRA1
- 5800			  LDX #$00
- 5810			  STX DDRB1
- 5820			  STA PORTA1
- 5830			  LDA PORTB1
- 5840			  AND #$1F
- 5850			  CMP #$1F
- 5860			  BNE .1
- 5870			  LDA #$FF
- 5880			  STY PORTA1
- 5890			  LDX PORTB1
- 5900			  STA PORTA1
- 5910			  LDA PORTB1
- 5920			  AND KEYTEMP
- 5930			  BEQ .1
- 5940			  TXA
- 5950			  AND KEYTEMP
- 5960			  BNE .1
- 5970			  SEC
- 5980			  BCS .2
- 5990 .1		  CLC
- 6000 .2		  LDA #$00
- 6010			  STA DDRA1
- 6020 .3		  RTS
- 6030 *--------------------------------
- 6040 *  TURN SCREEN OFF
- 6050 *--------------------------------
- 6060 TURN.SCREEN.OFF LDA VIC.CONTROL.1
- 6070		      AND #$EF
- 6080		      STA VIC.CONTROL.1
- 6090		      RTS
- 6100 *--------------------------------
- 6110 *  INIT SOUND
- 6120 *--------------------------------
- 6130 INIT.SOUND LDA #$00
- 6140		 STA FREQ.1   LOW BYTE
- 6150		 LDA #$05
- 6160		 STA FREQ.1+1 HI BYTE ($500)
- 6170		 LDA #$00
- 6180		 STA FREQ.1+2
- 6190		 STA FREQ.1+3 PULSE WIDTH=0
- 6200		 LDA #$11
- 6210		 STA ATTDEC.1
- 6220		 LDA #$24
- 6230		 STA SUSREL.1
- 6240 *--------------------------------
- 6250		 LDA #$00
- 6260		 STA $D415    FILTER CUTOFF
- 6270		 LDA #$00
- 6280		 STA $D416    FREQ=0
- 6290		 LDA #$00
- 6300		 STA $D417    NO FILTER
- 6310 *--------------------------------
- 6320		 LDA #$05
- 6330		 STA FREQ.2
- 6340		 STA FREQ.2+1
- 6350		 LDA #$00
- 6360		 STA FREQ.2+2
- 6370		 STA FREQ.2+3
- 6380		 LDA #$12
- 6390		 STA ATTDEC.2
- 6400		 LDA #$94
- 6410		 STA SUSREL.2
- 6420 *--------------------------------
- 6430 * 	 LDA #$05
- 6440 * 	 STA FREQ.3
- 6450 * 	 STA FREQ.3+1
- 6460 * 	 LDA #$00
- 6470 * 	 STA FREQ.3+2
- 6480 * 	 STA FREQ.3+3
- 6490 * 	 LDA #$00
- 6500 * 	 STA CONTROL.3
- 6510 * 	 LDA #$FA
- 6520 * 	 STA ATTDEC.3
- 6530 * 	 LDA #$A5
- 6540 * 	 STA SUSREL.3
- 6550 *--------------------------------
- 6560		 LDA #$0A
- 6570		 STA MASTER.VOLUME
- 6580 *--------------------------------
- 6590		 RTS
-
+;--------------------------------
+; INITIALIZE HARDWARE REGISTERS
+;--------------------------------
+INIT_HARDWARE	  LDA DDRA2
+		  ORA #$03	  ;SELECT VIDEO BANK
+		  STA DDRA2
+		  JSR CREATE_WIDEFONT
+		  RTS
+;--------------------------------
+; SETUP TEXT SCREEN
+;--------------------------------
+SETUP_TEXT LDA PORTA2
+	 AND #$FC
+	 ORA #$02	         ;SELECT BANK 1
+	 STA PORTA2	         ;$4000-$8000
+	 LDA VIC_CONTROL_1   ;TURN OFF HIRES
+	 AND #223
+	 STA VIC_CONTROL_1
+	 LDA VIC_CONTROL_2
+	 AND #239
+	 STA VIC_CONTROL_2
+	 LDA #$06	          ;SETUP POINTER TO CHARACTER SET
+	 STA VIC_MEMORY       ;AND SCREEN MEMORY
+	 RTS
+;--------------------------------
+; SETUP MULTICOLOR SCREEN
+;--------------------------------
+SETUP_HIRES	  LDA PORTA2
+		  AND #$FC
+		  ORA #$02
+		  STA PORTA2
+		  LDA #$08
+		  STA VIC_MEMORY
+		  LDA VIC_CONTROL_1
+		  ORA #32
+		  STA VIC_CONTROL_1
+		  LDA VIC_CONTROL_2
+		  ORA #16
+		  STA VIC_CONTROL_2
+		  RTS
+;--------------------------------
+; INIT IRQ1
+;--------------------------------
+INIT_IRQS LDA #<IRQ1	;INITIALIZE IRQ LOCATION
+	STA IRQLO	;TO POINT TO FIRST CHARACTER
+	LDA #>IRQ1
+	STA IRQHI
+	LDA #<NMI
+	STA NMI_VECTOR
+	LDA #>NMI
+	STA NMI_VECTOR+1
+;--------------------------------
+	LDA #$00
+	STA RASTER
+_1	LDA VIC_CONTROL_1
+	BPL _1			;SYNC VBLANK!
+	LDA #$01
+	STA IRQ_ENABLE
+	RTS
+;--------------------------------
+; INITIALIZE.GAME
+;--------------------------------
+INIT_GAME LDA #$07
+	STA VIC_CONTROL_1
+	LDA #$07
+	STA VIC_CONTROL_2
+	LDA #$00
+	STA INCUD
+	STA INCLR
+;-------------------------------
+; INITIALIZE SPRITES
+;--------------------------------
+	LDA #$12
+	STA SPRITE_POINTER   ;POINT TO CHOPPER
+	LDA #$16
+	STA SPRITE_POINTER+1 ;POINT TO PLANE
+	LDA #$17
+	STA SPRITE_POINTER+2 ;POINT TO SMART BOMB
+	LDA #$24
+	STA SPRITE_POINTER+3 ;POINT TO CLOUD
+	LDA #$1C
+	STA SPRITE_POINTER+4 ;POINT TO SUN
+	LDA #$23
+	STA SPRITE_POINTER+5 ;POINT TO BUCK1
+	LDA #$2D
+	STA SPRITE_POINTER+6 ;POINT TO GUN BULLET
+;--------------------------------
+	LDA #LT_GREEN
+	STA SPRITE_COLOR
+	LDA #BLACK
+	STA SPRITE_MCOLOR_0
+	LDA #WHITE
+	STA SPRITE_MCOLOR_1
+	STA SPRITE_COLOR+2
+	STA SPRITE_COLOR+3
+	LDA #YELLOW
+	STA SPRITE_COLOR+4
+	STA SPRITE_COLOR+5
+	LDA #$10
+	STA SPRITE_PRIORITY
+	LDA #$00
+	STA SPRITE_XXPAND
+	LDA #$67	       ;CHOP,PLANE,DUMP,BUCS
+	STA SPRITE_MULTI_COLOR
+	LDA #$FF
+	STA SPRITE_ENABLE
+	LDX #$00
+	TXA		           ;ZERO OUT SPRITE
+ZERO_LOOP:  STA CHOP_X,X   ;SHADOW REGISTERS
+	INX
+	CPX #$1A
+	BNE ZERO_LOOP
+	STA TRANSIT
+	STA HIT0
+	STA SPRITE_XMSB
+	LDY #$03
+_2	STA BOMB,Y
+	STA OLD_BOMB,Y
+	STA EXPGO,Y
+	STA TABLE_LO,Y
+	STA TABLE_LO+1,Y
+	DEY
+	BNE _2
+	RTS
+;--------------------------------
+;  INIT I.O SYSTEM
+;--------------------------------
+INIT_IO	 LDA #$7F	  ;INITIALIZE CIA'S ETC.
+	 STA CIA_1_IRQ
+	 STA CIA_2_IRQ
+	 STA PORTA1
+	 LDA #$08
+	 STA CIA1_CTRL_A
+	 STA CIA2_CTRL_A
+	 STA CIA1_CTRL_B
+	 STA CIA2_CTRL_B
+	 LDX #$00
+	 STX DDRB1
+	 STX DDRB2
+	 STX $D418
+	 DEX
+	 STX DDRA1
+	 LDA #$07
+	 STA PORTA2
+	 LDA #$3F
+	 STA DDRA2
+	 LDA #$E7
+	 STA $01
+	 LDA #$2F
+	 STA $00
+	 RTS
+;--------------------------------
+;  READ JOYSTICK DATA IN ACC
+;--------------------------------
+READ_STICKS LDA STICK_NUMBER
+		  BNE _1
+;--------------------------------
+		  LDA PORTB1
+		  AND #$1F
+		  RTS
+;--------------------------------
+_1	  LDA PLAYER
+		  BNE _2
+;--------------------------------
+		 LDA PORTB1
+		 AND #$1F
+		 RTS
+;--------------------------------
+_2	 LDA PORTA1
+		 AND #$1F
+		 RTS
+;--------------------------------
+; CREATE WIDEFONT
+;--------------------------------
+CREATE_WIDEFONT	          BUILD CHARACTER_MEMORY,TEMP1	;POINTER TO YOUR CSET
+			  BUILD $D800,TEMP3	     	;POINT TO CSET TO WIDEFONT FROM!
+			  LDA $01		        ;BANK IN CHARACTER ROM!
+			  AND #251
+			  STA $01
+STRETCH		  	  LDY #$07		;NUMBER OF CHARACTER LINES!
+_3			  LDA (TEMP3),Y 	;GET BYTE TO WIDEN
+			  PHA
+			  LDX #$04		;TIMES TO SHIFT
+_1		  	  ROL
+			  PHP
+			  ROL TEMP5
+			  PLP
+			  ROL TEMP5
+			  DEX
+			  BNE _1
+			  LDA TEMP5		;SAVE WIDENED CHARACTER
+			  STA (TEMP1),Y
+			  PLA
+			  LDX #$04
+_2		  	  ROR
+			  PHP
+			  ROR TEMP5
+			  PLP
+			  ROR TEMP5
+			  DEX
+			  BNE _2
+			  TYA
+			  PHA
+			  CLC
+			  ADC #$08
+			  TAY
+			  LDA TEMP5
+			  STA (TEMP1),Y   ;SAVE RIGHT HALF OF WIDE CHAR
+			  PLA
+			  TAY
+			  DEY
+			  BPL _3
+;--------------------------------
+INC_ADRESS	  	  LDA TEMP1
+			  CLC
+			  ADC #$10
+			  STA TEMP1
+			  BCC _1
+			  INC TEMP2
+_1		  	  LDA TEMP3
+			  CLC
+			  ADC #$08
+			  STA TEMP3
+			  BCC _2
+			  INC TEMP4
+_2		  	  LDA TEMP3
+			  CMP #<$DC00
+			  BNE STRETCH
+			  LDA TEMP4
+			  CMP #>$DC00
+			  BNE STRETCH
+			  LDA $01		       ;BANK I/O BACK IN
+			  ORA #$04
+			  STA $01
+			  RTS
+;--------------------------------
+; CLEAR TEXT SCREEN
+;--------------------------------
+CLEAR_SCREEN	  	  LDX #$00	  ;CLEAR SCREEN RAM
+_1		  	  LDA #$61
+			  STA SCREEN_MEMORY,X
+			  STA SCREEN_MEMORY+$100,X
+			  STA SCREEN_MEMORY+$200,X
+			  STA SCREEN_MEMORY+$2F7,X
+			  LDA #$09
+			  STA COLOR_MEMORY,X  ;ALSO COLOR MEM..
+			  STA COLOR_MEMORY+$100,X
+			  STA COLOR_MEMORY+$200,X
+			  STA COLOR_MEMORY+$2F7,X
+			  INX
+			  BNE _1
+			  RTS
+;--------------------------------
+CLEAR_TEXT LDX #$00
+_1	   LDA #$40
+	   STA SCREEN_MEMORY,X
+	   STA SCREEN_MEMORY+$100,X
+	   STA SCREEN_MEMORY+$200,X
+	   STA SCREEN_MEMORY+$2F7,X
+	   LDA #$00
+	   STA COLOR_MEMORY,X
+	   STA COLOR_MEMORY+$100,X
+	   STA COLOR_MEMORY+$200,X
+	   STA COLOR_MEMORY+$2F7,X
+	   INX
+	   BNE _1
+	   RTS
+;--------------------------------
+INIT_CM	 LDA #$00
+STA TEMP3  ; COLOR FLAG
+;--------------------------------
+	 LDA BILEVL
+	 AND #$07
+	 ASL
+		 TAX
+;--------------------------------
+	 LDA COLOR2_MEM_LO,X   ;TOP LIMITS
+	 STA TEMP5	           ;FOR THIS LEVEL
+	 LDA COLOR2_MEM_LO+1,X
+	 STA TEMP6
+;--------------------------------
+	 LDA #$DB	       ;BOTTOM
+	 STA LO+1	       ;OF DIRT
+	 LDA #$6F
+		 STA LO
+;--------------------------------
+	 LDY #$00
+;--------------------------------
+_3	 LDA #$00
+	 STA TEMP1  ;# OF BYTES PER LEVEL
+	 STA TEMP2
+;--------------------------------
+	 LDA TEMP3
+	 AND #$03
+	 TAX
+;--------------------------------
+	 LDA LCOLRS,X
+	 STA TEMP4
+;--------------------------------
+	 INC TEMP3    ;INDEX TO NEXT COLOR
+;--------------------------------
+_2	 LDA TEMP4
+	 STA (LO),Y
+;--------------------------------
+	 LDA LO
+	 BNE _11      ;SEE PG_82
+	 DEC LO+1     ;OF SUB BOOK
+_11	 DEC LO
+;--------------------------------
+_1	 LDA LO+1
+	 CMP TEMP6
+	 BNE _4
+	 LDA LO
+	 CMP TEMP5
+	 BEQ _5
+;--------------------------------
+_4	 INC TEMP1
+	 LDA TEMP1
+	 CMP #$78
+	 BNE _2
+;--------------------------------
+	 JMP _3
+_5	 PRINT_MACRO 0,22,BLACK,"                    "
+	 RTS
+;--------------------------------
+;  CLEAR HI-RES SCREEN
+;--------------------------------
+CLEAR_HIRES	  LDA #$00
+		  STA TEMP1
+		  LDA #>HIRES
+		  STA TEMP2
+		  LDX #32
+_1		  LDY #$00
+_2		  STA (TEMP1),Y
+			  INY
+			  BNE _2
+			  INC TEMP2
+			  DEX
+			  BNE _1
+			  JSR CLEAR_SCREEN
+			  RTS
+;--------------------------------
+; PRINT ROUTINE
+; ENTER WITH X=XCOOR Y=YCOOR
+; PRINT_COLOR=COLOR
+;--------------------------------
+PRINT		  STX PRINTX
+			  PLA
+			  CLC
+			  ADC #$01
+			  STA TEMP1
+			  PLA
+			  ADC #$00
+			  STA TEMP2
+			  STY MULT1
+			  LDA #$28
+			  STA MULT2
+			  JSR MULTIPLY	    ;MULTIPLY Y*40 COLUMN!
+			  LDA PRINTX
+			  CLC
+			  ADC MULT1
+			  STA MULT1
+			  LDA #>SCREEN_MEMORY
+			  ADC MULT2
+			  STA MULT2
+;--------------------------------
+			  LDY #$00
+_PRINT1		  LDA (TEMP1),Y
+			  INC TEMP1
+_PRINT2		  CMP #$FF
+			  BNE _PRINT3
+			  JMP (TEMP1)	;RETURN TO  CALLING ROUTINE!
+_PRINT3		  ASL
+			  STA (MULT1),Y
+			  CLC
+			  ADC #$01
+			  INY
+			  STA (MULT1),Y
+			  LDA MULT1
+			  STA TEMP3
+			  LDA MULT2
+			  CLC
+			  ADC #>(COLOR_MEMORY-SCREEN_MEMORY)
+			  STA TEMP4
+			  LDA PRINT_COLOR
+			  STA (TEMP3),Y
+			  DEY
+			  STA (TEMP3),Y
+			  LDA MULT1
+			  CLC
+			  ADC #$02
+			  STA MULT1
+			  BCC _PRINT1
+			  INC MULT2
+			  JMP _PRINT1
+;--------------------------------
+; MULTIPLICATION ROUTINE
+; ENTER WITH MULT1 & MULT2
+; RETURNS 16 BIT RESULT IN MULT 1 & 2
+; DESTROYS A,X
+;--------------------------------
+MULTIPLY		  LDA #$00
+			  LDX #$08
+_MULT_LOOP	          LSR MULT1
+			  BCC _MULT_SKIP
+			  CLC
+			  ADC MULT2
+_MULT_SKIP	          ROR
+			  ROR MULTIPLIER
+			  DEX
+			  BNE _MULT_LOOP
+			  STA MULT2
+			  LDA MULTIPLIER
+			  STA MULT1
+			  RTS
+;--------------------------------
+; DIVISION ROUTINE
+; DIVIDES UNSIGNED BINARY DIVIDEND
+; IN (DIVIDEND) BY UNSIGNED DIVISOR
+; IN (DIVISOR). QUOTIENT IS RETURNED
+; IN (DIVIDEND), AND REMAINDER IN
+; (REMAINDER)
+; DESTROYS A,X,Y
+;--------------------------------
+DIVIDE		  LDA #$00
+		  STA REMAINDER 	   ;CLEAR REMAINDER
+		  STA REMAINDER+1
+;--------------------------------
+		  LDX #16		   ;DIVIDEND BIT COUNT =16
+NXTBIT		  ASL DIVIDEND		   ;SHIFT DIVIDEND/QUOTIENT LEFT
+		  ROL DIVIDEND+1
+		  ROL REMAINDER
+		  ROL REMAINDER+1	   ;SHIFT PARTIAL DIVIDEND LEFT
+		  LDA REMAINDER
+		  SEC
+		  SBC DIVISOR		   ;SUBTRACT LOW BYTES
+		  TAY			   ;SAVE RESULT IN Y
+		  LDA REMAINDER+1
+		  SBC DIVISOR+1 	   ;SUBTRACT THE HIGH BYTES
+		  BCC CNTDN		   ;DIVISOR > DIVIDEND?
+		  INC DIVIDEND		   ;NO. SET BIT IN QUOTIENT
+		  STA REMAINDER+1	   ;ENTER SUBTRACTION RESULT
+		  TYA			   ;INTO PARTIAL DIVIDEND
+		  STA REMAINDER
+CNTDN		  DEX			   ;LOOP FOR 16 BITS!
+		  BNE NXTBIT
+		  RTS
+;--------------------------------
+; SCAN KEYBOARD! IGNORE JOYSTICK
+; ENTER A=MASK BIT AND Y=STROBE SETUP
+;--------------------------------
+KEY_SCAN	  STA KEYTEMP
+		  LDA #$FF
+		  STA DDRA1
+		  LDX #$00
+		  STX DDRB1
+		  STA PORTA1
+		  LDA PORTB1
+		  AND #$1F
+		  CMP #$1F
+		  BNE _1
+		  LDA #$FF
+		  STY PORTA1
+		  LDX PORTB1
+		  STA PORTA1
+		  LDA PORTB1
+		  AND KEYTEMP
+		  BEQ _1
+		  TXA
+		  AND KEYTEMP
+		  BNE _1
+		  SEC
+		  BCS _2
+_1		  CLC
+_2		  LDA #$00
+		  STA DDRA1
+_3		  RTS
+;--------------------------------
+;  TURN SCREEN OFF
+;--------------------------------
+TURN_SCREEN_OFF LDA VIC_CONTROL_1
+		AND #$EF
+		STA VIC_CONTROL_1
+		RTS
+;--------------------------------
+;  INIT SOUND
+;--------------------------------
+INIT_SOUND       LDA #$00
+		 STA FREQ_1   ;LOW BYTE
+		 LDA #$05
+		 STA FREQ_1+1 ;HI BYTE ($500)
+		 LDA #$00
+		 STA FREQ_1+2
+		 STA FREQ_1+3 ;PULSE WIDTH=0
+		 LDA #$11
+		 STA ATTDEC_1
+		 LDA #$24
+		 STA SUSREL_1
+;--------------------------------
+		 LDA #$00
+		 STA $D415    ;FILTER CUTOFF
+		 LDA #$00
+		 STA $D416    ;FREQ=0
+		 LDA #$00
+		 STA $D417    ;NO FILTER
+;--------------------------------
+		 LDA #$05
+		 STA FREQ_2
+		 STA FREQ_2+1
+		 LDA #$00
+		 STA FREQ_2+2
+		 STA FREQ_2+3
+		 LDA #$12
+		 STA ATTDEC_2
+		 LDA #$94
+		 STA SUSREL_2
+;--------------------------------
+; 	 LDA #$05
+; 	 STA FREQ_3
+; 	 STA FREQ_3+1
+; 	 LDA #$00
+; 	 STA FREQ_3+2
+; 	 STA FREQ_3+3
+; 	 LDA #$00
+; 	 STA CONTROL_3
+; 	 LDA #$FA
+; 	 STA ATTDEC_3
+; 	 LDA #$A5
+; 	 STA SUSREL_3
+;--------------------------------
+	 LDA #$0A
+	 STA MASTER_VOLUME
+;--------------------------------
+	 RTS
