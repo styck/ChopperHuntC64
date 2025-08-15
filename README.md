@@ -356,3 +356,23 @@ Potential Risks
 If any included file (not shown in the first 80 lines) uses direct addressing or custom buffers in zero page, stack, or hardware areas without equates, there could be risk.
 If the total code/data size exceeds $3FFF, it could overwrite screen/sprite/character/hires memory.
 If variables or buffers are defined in $0400-$0800, ensure they do not overlap with system vectors or BASIC workspace.
+
+<img width="320" height="200" alt="chopper-hunt_1" src="https://github.com/user-attachments/assets/205cc273-d259-4ed6-88de-9b96eb249686" />
+
+<img width="320" height="200" alt="chopper-hunt_2" src="https://github.com/user-attachments/assets/f1ff78ab-a643-4a2b-b35f-f78cddd08dad" />
+
+<img width="320" height="200" alt="chopper-hunt_3" src="https://github.com/user-attachments/assets/5b60958a-c26b-433c-9d2c-e76f9a9a87bc" />
+
+<img width="320" height="200" alt="chopper-hunt_4" src="https://github.com/user-attachments/assets/c16b16bf-6784-4192-a193-78b342980478" />
+
+<img width="320" height="200" alt="chopper-hunt_5" src="https://github.com/user-attachments/assets/89664dae-068b-4ff9-8c45-b8e582a65b67" />
+
+<img width="300" height="200" alt="chopper-hunt_6" src="https://github.com/user-attachments/assets/57e9747c-79c6-4b0a-aee2-1f0732eab245" />
+
+<img width="320" height="200" alt="chopper-hunt_8" src="https://github.com/user-attachments/assets/c5f62736-d1e4-4d4d-a8f1-0b0871a432c6" />
+
+<img width="320" height="200" alt="chopper-hunt_10" src="https://github.com/user-attachments/assets/3b82694f-7b60-440b-974d-ca85c9d49978" />
+
+<img width="320" height="200" alt="chopper-hunt_11" src="https://github.com/user-attachments/assets/13df2119-2a9e-46de-8824-e53097670bbf" />
+
+<img width="320" height="200" alt="chopper-hunt_12" src="https://github.com/user-attachments/assets/15e31849-75d1-4f7a-9351-abee44cae4dc" />
