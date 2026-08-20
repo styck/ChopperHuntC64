@@ -1,0 +1,10 @@
+# Build artifacts (64tass)
+listing.txt
+labels.txt
+*.log
+vlog.txt
+
+# Temporary test files
+build-test.prg
+mc.txt
+shot.png

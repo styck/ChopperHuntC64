@@ -181,12 +181,14 @@ SCR_HI	 .word SCR
 ATT_LO	 .word ATT
 ATT_HI	 .word ATT
 ;*--------------------------------
+.virtual $0400
 DIE_FLAG	 .fill 2
 SURFACE_X  .fill 1
 SCAN_X	 .fill 1
 SCAN_Y	 .fill 1
 DUD	 .fill 1
 START	 .fill 1
+.endv
 ;*--------------------------------
 BLADE_SHAPE .byte $03,$F0,$00,$00,$0F,$C0
 		  .byte $00,$F0,$00,$00,$0F,$00
@@ -320,6 +322,7 @@ GUNON	 .byte $3C
 WPXADD	 .word 0,1,255,0,1,2,255,0,1,2,0,1
 WPYADD	 .word 0,0,1,1,1,1,2,2,2,2,3,3
 ;*--------------------------------
+.virtual $0407
 STICK_NUMBER  .fill 1
 ABORT	 .fill 1
 ABORT_FLAG .fill 1
@@ -391,6 +394,7 @@ RY5	 .fill 11
 RY6	 .fill 11
 ;*--------------------------------
 KILL_DIRT_FLAG .fill 11
+.endv
 ;*--------------------------------
 LRIND	 .byte 00
 EXPHT	 .byte 0,0,0,0,0,0,0,0,0,0,0,0
@@ -404,6 +408,7 @@ BOMBDR	 .byte 0,0,0,0,0,0,0,0
 BOMB_CNT_VAL  .byte 9,5,1,5,9
 ;*--------------------------------
 BOMB_YINC  .byte 1,2,1,2,1
+.virtual $0517
 BOMB_YDEL  .fill 5
 HP0	 .fill 8
 DRTHIT	 .fill 1
@@ -450,6 +455,7 @@ BFXHLD	 .fill 1
 ;*--------------------------------
 EXPBGC	 .fill 1
 TEMPCX	 .fill 1
+.endv
 ;*--------------------------------
 ;* COLORS
 ;*--------------------------------
@@ -476,7 +482,7 @@ NMI_VECTOR	  = $318
 ;*--------------------------------
 ;* ZERO PAGE VARIABLES
 ;*--------------------------------
-* = $05
+.virtual $05
 PAUSE	.fill 1
 CHOP_X	.fill 1
 CHOP_XMSB .fill 1
@@ -719,4 +725,5 @@ TIMER6	.fill 1
 TIMER7	.fill 1
 TIMER8	.fill 1
 TIMER9	.fill 1
+.endv
 ;*--------------------------------

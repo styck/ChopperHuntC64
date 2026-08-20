@@ -10,6 +10,19 @@ clear_pg0_loop:
     DEX
     BPL clear_pg0_loop
 ;--------------------------------
+; CLEAR VARIABLE AREA $0400-$07FF
+; (default screen RAM until VIC is remapped)
+;--------------------------------
+    LDA #$00
+    LDX #$00
+clear_var_loop:
+    STA $0400,X
+    STA $0500,X
+    STA $0600,X
+    STA $0700,X
+    INX
+    BNE clear_var_loop
+;--------------------------------
     LDA #$20
     LDX #$07
 clear_score_loop:

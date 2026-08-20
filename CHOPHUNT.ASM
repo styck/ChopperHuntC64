@@ -1,14 +1,20 @@
-* = $0801
-.byte $0c, $08, $0a, $00, $9e, $20, $32, $30, $34, $38, $00, $00, $00
-* = $0800  ; Your program’s original start address
-
 ;--------------------------------
 ; SAVE CHOPPER HUNT
 ; (C) 1984 IMAGIC
 ; BY APPLIED COMPUTER TECHNOLOGY
 ;--------------------------------
-    
+;
+; Auto-run BASIC stub: 10 SYS <COLD_START> - the SYS address is
+; computed automatically by 64tass so it never needs updating.
+
+* = $0801
+    .word (+), 10
+    .null $9e, format("%4d", COLD_START)
++   .word 0
+
     .include "CHOPMAC.ASM"
+    .include "CHOPEQU.ASM"
+    .include "SHAPES.ASM"
     .include "CHOPCOD1.ASM"
     .include "CHOPCOD2.ASM"
     .include "CHOPCOD3.ASM"
@@ -27,5 +33,3 @@
     .include "GUNCHECK.ASM"
     .include "PRTINTRM.ASM"
     .include "GAMEOVER.ASM"
-    .include "CHOPEQU.ASM"
-    .include "SHAPES.ASM"

@@ -4,18 +4,18 @@
     {
       "label": "Build with 64tass",
       "type": "shell",
-      "command": "64tass",
-"args": [
-        "${file}",
+      "command": "C:/Users/styck/tools/64tass/64tass-1.60.3243/64tass.exe",
+      "args": [
+        "${workspaceFolder}/CHOPHUNT.ASM",
         "-o",
-        "${fileDirname}/${fileBasenameNoExtension}.prg",
+        "${workspaceFolder}/CHOPHUNT.prg",
         "-L",
-        "${fileDirname}/listing.txt",
+        "${workspaceFolder}/listing.txt",
         "--line-numbers",
         "--verbose-list",
         "--vice-labels",
         "-l",
-        "${fileDirname}/labels.txt"
+        "${workspaceFolder}/labels.txt"
       ],
       "group": {
         "kind": "build",
@@ -26,8 +26,11 @@
     {
       "label": "Run in VICE",
       "type": "shell",
-      "command": "C:/Users/styck/AtariC64/WinVice/GTK3VICE-3.7-win64/bin/x64sc.exe",
-      "args": ["${fileDirname}/${fileBasenameNoExtension}.prg"],
+      "command": "C:/Users/styck/AppData/Local/Microsoft/WinGet/Packages/VICE-Team.VICE.GTK3_Microsoft.Winget.Source_8wekyb3d8bbwe/GTK3VICE-3.10-win64/bin/x64sc.exe",
+      "args": [
+        "-autostart",
+        "${workspaceFolder}/CHOPHUNT.prg"
+      ],
       "dependsOn": "Build with 64tass"
     }
   ]
