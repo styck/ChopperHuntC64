@@ -7,15 +7,15 @@ GAME_OVER  LDA #$00
            LDA #$00
            STA IRQ_ENABLE
 ;--------------------------------
-           LDA <SCORE_ONE
+           LDA #<SCORE_ONE
            STA LO
-           LDA >SCORE_ONE
+           LDA #>SCORE_ONE
            STA LO+1
            JSR CHECK_HI_SCORE
 ;--------------------------------
-           LDA <SCORE_TWO
+           LDA #<SCORE_TWO
            STA LO
-           LDA >SCORE_TWO
+           LDA #>SCORE_TWO
            STA LO+1
            JSR CHECK_HI_SCORE
 ;--------------------------------
@@ -29,9 +29,9 @@ GAME_OVER  LDA #$00
 ;--------------------------------
            LDA #$31
            STA PLAYER_MSG+13
-           LDA <PLAYER_MSG
+           LDA #<PLAYER_MSG
            STA LO
-           LDA >PLAYER_MSG
+           LDA #>PLAYER_MSG
            STA LO+1
            LDA #03
            STA YPOS
@@ -43,23 +43,23 @@ TEST_PLY   LDA PLAYRS
 _12        LDA NAME_FLAG
            BEQ _22
 ;--------------------------------
-           LDA <NAME
+           LDA #<NAME
            STA LO
-           LDA >NAME
+           LDA #>NAME
            STA LO+1
            LDA #18
            STA YPOS
            JSR PRINT_MSG
-           LDA <NAME2
+           LDA #<NAME2
            STA LO
-           LDA >NAME2
+           LDA #>NAME2
            STA LO+1
            LDA #20
            STA YPOS
            JSR PRINT_MSG
-           LDA <NAME3
+           LDA #<NAME3
            STA LO
-           LDA >NAME3
+           LDA #>NAME3
            STA LO+1
            LDA #22
            STA YPOS
@@ -74,9 +74,9 @@ _22        PRINT_MACRO 0,20,WHITE,"    CHOPPER HUNT    "
 ;--------------------------------
 _1         LDA #$32
            STA PLAYER_MSG+13
-           LDA <PLAYER_MSG
+           LDA #<PLAYER_MSG
            STA LO
-           LDA >PLAYER_MSG
+           LDA #>PLAYER_MSG
            STA LO+1
            LDA #19
            STA YPOS
@@ -84,17 +84,17 @@ _1         LDA #$32
 ;--------------------------------
 _2         LDA #WHITE
            STA PRINT_COLOR
-           LDA <GAME_OVR_MSG
+           LDA #<GAME_OVR_MSG
            STA LO
-           LDA >GAME_OVR_MSG
+           LDA #>GAME_OVR_MSG
            STA LO+1
            LDA #$0B
            STA YPOS
            JSR PRINT_MSG
 ;--------------------------------
-           LDA <HI_SCORE_MSG
+           LDA #<HI_SCORE_MSG
            STA LO
-           LDA >HI_SCORE_MSG
+           LDA #>HI_SCORE_MSG
            STA LO+1
            LDA #$0D
            STA YPOS
@@ -102,9 +102,9 @@ _2         LDA #WHITE
 ;--------------------------------
 ; PRINT PLAYER 1 SCORE
 ;--------------------------------
-           LDA <SCORE_ONE
+           LDA #<SCORE_ONE
            STA LO
-           LDA >SCORE_ONE
+           LDA #>SCORE_ONE
            STA LO+1
            LDA #05
            STA YPOS
@@ -114,9 +114,9 @@ _2         LDA #WHITE
 ;--------------------------------
            LDA PLAYRS
            BEQ PR_HI
-           LDA <SCORE_TWO
+           LDA #<SCORE_TWO
            STA LO
-           LDA >SCORE_TWO
+           LDA #>SCORE_TWO
            STA LO+1
            LDA #21
            STA YPOS
@@ -124,9 +124,9 @@ _2         LDA #WHITE
 ;--------------------------------
 ; PRINT HI-SCORE
 ;--------------------------------
-PR_HI      LDA <SCORE_HI
+PR_HI      LDA #<SCORE_HI
            STA LO
-           LDA >SCORE_HI
+           LDA #>SCORE_HI
            STA LO+1
            LDA #$0F
            STA YPOS
@@ -179,9 +179,9 @@ _1         .text "0"
 _3         RTS
 ;--------------------------------
 GAME_OVR_IRQ    SEI
-                LDA <GO_IRQ
+                LDA #<GO_IRQ
                 STA IRQLO
-                LDA >GO_IRQ
+                LDA #>GO_IRQ
                 STA IRQHI
                 LDA #$00
                 STA RASTER
@@ -196,8 +196,8 @@ _1         LDX RASTER
            BNE _1
            STA $D021
            LDA #$75
-           LDX <GO_IRQ_2
-           LDY >GO_IRQ_2
+           LDX #<GO_IRQ_2
+           LDY #>GO_IRQ_2
            STA RASTER
            STX IRQLO
            STY IRQHI
@@ -218,8 +218,8 @@ _1         LDX RASTER
            STA $D021
 ;--------------------------------
            LDA #$BA
-           LDX <GO_IRQ_3
-           LDY >GO_IRQ_3
+           LDX #<GO_IRQ_3
+           LDY #>GO_IRQ_3
            STA RASTER
            STX IRQLO
            STY IRQHI
@@ -238,8 +238,8 @@ _1         LDX RASTER
            BNE _1
            STA $D021
            LDA #$00
-           LDX <GO_IRQ
-           LDY >GO_IRQ
+           LDX #<GO_IRQ
+           LDY #>GO_IRQ
            STA RASTER
            STX IRQLO
            STY IRQHI

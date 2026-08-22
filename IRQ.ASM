@@ -1,7 +1,35 @@
 ;--------------------------------
 ;  SAVE IRQ.CODE
 ;--------------------------------
-IRQ1:		LDA #BLACK
+IRQ1:		LDA DEMO		; title/demo: keep IRQ tiny
+		BEQ irq1_game
+;--------------------------------
+; Re-pin the VIC bank every frame. Something during the title re-runs the
+; KERNAL CINT setup, which selects bank 0 ($DD00=$07) and blanks the title.
+; Only touch $DD00 here: writing $D011 inside a raster IRQ while the raster
+; is on the match line re-triggers the IRQ endlessly (IRQ storm).
+; The raster IRQ fires on match line 0 (RASTER=$00). Acknowledging $D019
+; while the raster is STILL on line 0 re-triggers the flag instantly and the
+; CPU storms in this IRQ forever (black screen). Wait for the raster to leave
+; line 0 before acknowledging, so the flag stays cleared.
+;--------------------------------
+		LDA PORTA2
+		AND #$FC
+		ORA #$02
+		STA PORTA2		; VIC bank 1 ($4000-$7fff)
+		INC SEED
+demo_irq_wait:	LDA RASTER
+		BEQ demo_irq_wait	; still on match line, wait
+		LDA #$01		; ack raster IRQ (off the match line)
+		STA VIC_IRQ
+		PLA
+		TAY
+		PLA
+		TAX
+		PLA
+		RTI
+;--------------------------------
+irq1_game:	LDA #BLACK
 		STA BACKGROUND_COLOR0
 		JSR SETUP_HIRES
 		INC SEED
@@ -384,8 +412,8 @@ START_GUN:	LDA GUNFAL		;DROP GUN?
 		STA GUN_Y		;SHOW GUN ON SCREEN
 ;--------------------------------
 MOD3:		LDA #$B0
-		LDX <IRQ1_2
-		LDY >IRQ1_2
+		LDX #<IRQ1_2
+		LDY #>IRQ1_2
 		STA RASTER
 		STX IRQLO
 		STY IRQHI
@@ -565,8 +593,8 @@ PLANE_EXIT:	DEC PLANE_TIM
 		BNE PLANE_LUP
 ;--------------------------------
 MOD:		LDA #$D0
-MOD1:		LDX <IRQ3
-MOD2:		LDY >IRQ3
+MOD1:		LDX #<IRQ3
+MOD2:		LDY #>IRQ3
 		STA RASTER
 		STX IRQLO
 		STY IRQHI
@@ -602,8 +630,8 @@ irq2_raster_wait:
 		STA VIC_CONTROL_2
 ;--------------------------------
 IRQ2_END:	LDA #$00
-		LDX <IRQ1
-		LDY >IRQ1
+		LDX #<IRQ1
+		LDY #>IRQ1
 		STA RASTER
 		STX IRQLO
 		STY IRQHI
@@ -637,8 +665,8 @@ irq3_raster_wait:
 		LDA IRQ_TEMP2
 		STA VIC_CONTROL_2
 		LDA #$00
-		LDX <IRQ1
-		LDY >IRQ1
+		LDX #<IRQ1
+		LDY #>IRQ1
 		STA RASTER
 		STX IRQLO
 		STY IRQHI
@@ -670,7 +698,10 @@ INIT_IRQ:	SEI
 		LDA #$B6
 		STA MOD4+1
 ;--------------------------------
-		CLI
+; Do NOT enable IRQs here. Enabling interrupts right after this RTS lets a
+; pending raster IRQ (line 0) fire before the caller can SEI, which storms
+; the CPU in the demo IRQ and blanks the title. Callers enable IRQs when ready.
+;--------------------------------
 		RTS
 ;--------------------------------
 CHANGE_IRQ:	SEI

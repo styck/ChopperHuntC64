@@ -82,13 +82,26 @@ The game uses raster interrupts to change screen colors and perform other action
 
 ```assembly
 IRQ1:
+    LDA DEMO          ; title/demo: keep the IRQ tiny
+    BEQ irq1_game
+    LDA PORTA2        ; re-pin VIC bank 1 ($4000-$7fff)
+    AND #$FC
+    ORA #$02
+    STA PORTA2
+    INC SEED
+    LDA #$01          ; acknowledge the raster IRQ
+    STA VIC_IRQ
+    ...
+    RTI
+
+irq1_game:
     LDA #BLACK
     STA BACKGROUND_COLOR0
     JSR SETUP_HIRES
     ...
-    LDA #$B0
-    LDX <IRQ1_2
-    LDY >IRQ1_2
+    LDA #$B0          ; MOD3: set up the next raster split
+    LDX #<IRQ1_2
+    LDY #>IRQ1_2
     STA RASTER
     STX IRQLO
     STY IRQHI

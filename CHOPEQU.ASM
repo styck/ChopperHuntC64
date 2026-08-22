@@ -168,8 +168,8 @@ BOFS	 .word 56,106,156
 BNUMBER	 .byte 00
 COLIX	 .byte 0,0,0,1,0,0,0,2,0,0,0,1,0,0
 SCOOFS	 .byte 0,0,0,1,0,2,0,3,0,5,0,6,0,7
-P1LINI	 .byte 0,3,0,3
-P2LINI	 .byte 0,0,0,3
+P1LINI	 .byte 3,3,0,3	; player 1 lives: index 0 = one player, 1 = two players
+P2LINI	 .byte 0,3,0,3	; player 2 lives: index 0 = one player, 1 = two players
 LIFE1	 .byte 0,0,0,0
 LIFE2	 .byte 0,0,0,0
 PLOTBL	 .byte $C0,$30,$0C,$03
@@ -328,6 +328,7 @@ ABORT	 .fill 1
 ABORT_FLAG .fill 1
 KEYTEMP	 .fill 1
 NAME_FLAG  .fill 1
+FIRE_ARMED .fill 1		; title: fire must release then press
 SEED	 .fill 1
 CHOP_YTEM  .fill 1
 LANDFG	 .fill 1

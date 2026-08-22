@@ -688,7 +688,9 @@ DO_SCRMEM  LDA BILEVL
 fill_loop	 LDA #$31
 		 STA (LO),Y
 		 INC LO
-		 LDA LO+1
+		 BNE fill_loop_chk
+		 INC LO+1
+fill_loop_chk	 LDA LO+1
 		 CMP #$43
 		 BNE fill_loop
 		 LDA LO

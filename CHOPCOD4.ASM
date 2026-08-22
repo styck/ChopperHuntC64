@@ -23,6 +23,23 @@ SETUP_TEXT LDA PORTA2
 	 STA VIC_MEMORY       ;AND SCREEN MEMORY
 	 RTS
 ;--------------------------------
+; TITLE / DEMO TEXT DISPLAY
+; Full known-good VIC text state (bank, mode, colors, no sprites)
+;--------------------------------
+SETUP_TITLE_DISPLAY
+	 JSR SETUP_TEXT
+	 LDA #$1B		; DEN|RSEL|YSCROLL=3  (standard text frame)
+	 STA VIC_CONTROL_1
+	 LDA #$08		; 40 columns, MCM off
+	 STA VIC_CONTROL_2
+	 LDA #WHITE
+	 STA BORDER_COLOR
+	 LDA #BLUE
+	 STA BACKGROUND_COLOR0
+	 LDA #$00
+	 STA SPRITE_ENABLE	; no sprite data loaded yet
+	 RTS
+;--------------------------------
 ; SETUP MULTICOLOR SCREEN
 ;--------------------------------
 SETUP_HIRES	  LDA PORTA2
@@ -144,7 +161,7 @@ INIT_IO	 LDA #$7F	  ;INITIALIZE CIA'S ETC.
 	 STA PORTA2
 	 LDA #$3F
 	 STA DDRA2
-	 LDA #$E7
+	 LDA #$37
 	 STA $01
 	 LDA #$2F
 	 STA $00
@@ -173,7 +190,7 @@ _2	 LDA PORTA1
 ; CREATE WIDEFONT
 ;--------------------------------
 CREATE_WIDEFONT	          BUILD CHARACTER_MEMORY,TEMP1	;POINTER TO YOUR CSET
-			  BUILD $D800,TEMP3	     	;POINT TO CSET TO WIDEFONT FROM!
+			  BUILD $D000,TEMP3	     	;POINT TO CSET (charset 1 = UPPERCASE) TO WIDEFONT FROM!
 			  LDA $01		        ;BANK IN CHARACTER ROM!
 			  AND #251
 			  STA $01
@@ -224,10 +241,10 @@ _1		  	  LDA TEMP3
 			  BCC _2
 			  INC TEMP4
 _2		  	  LDA TEMP3
-			  CMP #<$DC00
+			  CMP #<$D400
 			  BNE STRETCH
 			  LDA TEMP4
-			  CMP #>$DC00
+			  CMP #>$D400
 			  BNE STRETCH
 			  LDA $01		       ;BANK I/O BACK IN
 			  ORA #$04
@@ -367,9 +384,20 @@ PRINT		  STX PRINTX
 			  LDY #$00
 _PRINT1		  LDA (TEMP1),Y
 			  INC TEMP1
+			  BNE _PRINT2
+			  INC TEMP2
 _PRINT2		  CMP #$FF
 			  BNE _PRINT3
-			  JMP (TEMP1)	;RETURN TO  CALLING ROUTINE!
+			  LDA TEMP1
+			  SEC
+			  SBC #$01
+			  TAX
+			  LDA TEMP2
+			  SBC #$00
+			  PHA
+			  TXA
+			  PHA
+			  RTS
 _PRINT3		  ASL
 			  STA (MULT1),Y
 			  CLC

@@ -406,8 +406,12 @@ DO_MOUNT LDA INILVL
 _2	 LDA (TEMP3),Y
 	 STA (LO),Y
 	 INC TEMP3
-	 INC LO
-	 LDA LO
+	 BNE _2a
+	 INC TEMP4
+_2a	 INC LO
+	 BNE _2b
+	 INC LO+1
+_2b	 LDA LO
 	 CMP TEMP1
 	 BNE _2
 	 LDA LO+1
@@ -436,9 +440,12 @@ DO_COLOR LDA BILEVL
 _22	 LDA (TEMP3),Y
 	 STA (TEMP5),Y
 	 INC TEMP3
-	 INC TEMP5
-;--------------------------------
-	 DEC TEMP1
+	 BNE _22a
+	 INC TEMP4
+_22a	 INC TEMP5
+	 BNE _22b
+	 INC TEMP6
+_22b	 DEC TEMP1
 	 BNE _22
 ;--------------------------------
 ; SAME FOR COLOR MEM
@@ -463,9 +470,12 @@ _22	 LDA (TEMP3),Y
 _33	 LDA (TEMP3),Y
 	 STA (TEMP5),Y
 	 INC TEMP3
-	 INC TEMP5
-;--------------------------------
-	 DEC TEMP1
+	 BNE _33a
+	 INC TEMP4
+_33a	 INC TEMP5
+	 BNE _33b
+	 INC TEMP6
+_33b	 DEC TEMP1
 	 BNE _33
 	 RTS
 ;--------------------------------

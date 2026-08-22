@@ -12,6 +12,8 @@
     .null $9e, format("%4d", COLD_START)
 +   .word 0
 
+    .enc "screen"    ; game text strings use screencodes
+
     .include "CHOPMAC.ASM"
     .include "CHOPEQU.ASM"
     .include "SHAPES.ASM"

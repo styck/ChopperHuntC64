@@ -254,7 +254,11 @@ _1	  	  RTS
 ;--------------------------------
 ;  CHOPPER CODE
 ;--------------------------------
-CHOPPR	 	 LDA NPWAIT  ;WAITING FOR NEW PLAYER
+CHOPPR	 	 LDA DEMO	 ; never run level-complete in demo/title
+		 BEQ choppr_game
+		 RTS
+choppr_game:
+		 LDA NPWAIT  ;WAITING FOR NEW PLAYER
 		 BEQ CHOPR2  ;NO
 		 RTS
 CHOPR2	 	 LDA HIT0    ;CHOPPER HIT BACKGROUND?
