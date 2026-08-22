@@ -51,10 +51,9 @@ clear_hw_loop:
     JSR INIT_HARDWARE
     JSR INIT_IRQS
     JSR INIT_SOUND
-    ; leave IRQs disabled until title text is ready
+    CLI
 ;--------------------------------
-DEMOIN	 SEI
-    JSR INIT_GAME
+DEMOIN	 JSR INIT_GAME
     LDA #$02
     STA BODPH
 ;--------------------------------
@@ -83,14 +82,11 @@ DEMOIN	 SEI
     STA CHOP_SPEED
 ;--------------------------------
     JSR INIT_IRQ	  ;SETUP DEMO SCREEN
-    SEI			  ; INIT_IRQ ends with CLI; keep IRQs off for text
-    JSR CLEAR_TEXT	  ; blank (wide-font space $40), not CLEAR_SCREEN's $61 color-matrix fill
+    JSR CLEAR_SCREEN
 ;--------------------------------
-    ; Title is text-mode only. CRTINI builds a full hires level and
-    ; leaves the display unusable for PRINT; skip it here.
     LDA #$FC	  ;FORCE LOWER
-    STA BILEVL	  ;LEVEL (demo table index)
-    JSR SETUP_TITLE_DISPLAY
+    STA BILEVL	  ;LEVEL
+    JSR CRTINI
 ;--------------------------------
     LDA #$02
     STA BODPH
@@ -103,7 +99,6 @@ DEMOIN	 SEI
     LDA #$FF		; title hold — keep "CHOPPER HUNT / IMAGIC / COPYRIGHT" visible ~1.6s
     STA TEMP1
 delay_loop:
-    JSR SETUP_TITLE_DISPLAY	; re-pin VIC state during the hold (IRQs are off here)
     JSR DELAY
     DEC TEMP1
     LDA TEMP1
@@ -113,8 +108,9 @@ INTRO_SCR  PRINT_MACRO 0,19,BROWN,"                    "
     PRINT_MACRO 2,20,WHITE,"PRESS F7 TO START  "
     PRINT_MACRO 0,21,YELLOW,"                    "
 ;--------------------------------
-    ; Re-assert title VIC in case anything touched it during PRINT/delay
-    JSR SETUP_TITLE_DISPLAY
+    LDA #$01
+    STA IRQ_ENABLE
+    CLI
 ;--------------------------------
     LDA #<ONE_STICK_MSG
     STA LO
@@ -150,17 +146,7 @@ MOVE_SPR	 LDA #$00
     LDA #$02
     STA BODPH
 ;--------------------------------
-    ; The title runs with IRQs OFF. The demo IRQ only re-pins the VIC bank and
-    ; bumps SEED, which BUTTON_LUP does inline below, so no IRQ is needed here.
-    ; Keeping IRQs off avoids a raster-IRQ storm on the match line. The game
-    ; enables the raster IRQ itself in MAININ (JSR INIT_IRQ / CLI).
-;--------------------------------
-BUTTON_LUP LDA PORTA2	; keep VIC bank 1 pinned in the title loop
-    AND #$FC
-    ORA #$02
-    STA PORTA2
-    INC SEED		; demo IRQ is off during the title: keep seed fresh inline
-    JSR START_PLANE
+BUTTON_LUP JSR START_PLANE
 ;--------------------------------
 ; CHECK F3  (NUMBER OF PLAYERS)
 ;--------------------------------
@@ -381,7 +367,7 @@ DUMMY2	 STA GUNFAL
     LDA SPRITE_BCOLIDE  ;CLEAR COLLISION REGISTER
 ;--------------------------------
     JSR INIT_IRQ
-    CLI		;INIT_IRQ no longer enables IRQs; the game needs the raster IRQ
+    CLI		;INIT_IRQ enables IRQs; explicit CLI for the game start
 ;--------------------------------
     LDA #75     ;START WITH 75
     STA BOMBLD  ;BOMBS

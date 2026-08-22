@@ -35,3 +35,4 @@
     .include "GUNCHECK.ASM"
     .include "PRTINTRM.ASM"
     .include "GAMEOVER.ASM"
+    .include "SPRITES.ASM"

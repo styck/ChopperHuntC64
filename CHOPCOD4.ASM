@@ -24,7 +24,9 @@ SETUP_TEXT LDA PORTA2
 	 RTS
 ;--------------------------------
 ; TITLE / DEMO TEXT DISPLAY
-; Full known-good VIC text state (bank, mode, colors, no sprites)
+; Full known-good VIC text state (bank, mode, colors). Leaves sprites as-is:
+; INIT_GAME already enabled them (the title shows the demo plane sprite), and
+; clearing SPRITE_ENABLE here would leave them off for the whole game.
 ;--------------------------------
 SETUP_TITLE_DISPLAY
 	 JSR SETUP_TEXT
@@ -36,8 +38,6 @@ SETUP_TITLE_DISPLAY
 	 STA BORDER_COLOR
 	 LDA #BLUE
 	 STA BACKGROUND_COLOR0
-	 LDA #$00
-	 STA SPRITE_ENABLE	; no sprite data loaded yet
 	 RTS
 ;--------------------------------
 ; SETUP MULTICOLOR SCREEN
