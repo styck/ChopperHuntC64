@@ -30,9 +30,10 @@ $0400-$0800   Variables (cleared at boot by COLD_START)
 $05-$00FA     Zero-page variables
 $0801-$080D   BASIC auto-run stub ("10 SYS <COLD_START>")
 $080D-$3F28   Code + data tables + shapes (all under $4000)
-$4000-$4400   Screen RAM (set up at runtime)
-$4400-$5800   Sprite memory (set up at runtime)
-$5800-$6000   Character set
+$4000-$43E7   Screen RAM (40 x 25, set up at runtime)
+$43F8-$43FF   Sprite pointers
+$4400-$4B7F   Sprite data (30 blocks x 64 bytes)
+$5800-$6000   Character set (text mode)
 $6000-$8000   Hi-res bitmap
 ```
 

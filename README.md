@@ -227,6 +227,68 @@ In short, the `PRINT_MACRO` acts as a user-friendly interface that sets up the p
 
 
 
+## Sprite Data Reference
+
+Sprite graphics live in VIC bank 1 (`PORTA2` = `$02`, `$4000-$7FFF`). The
+sprite data is at `$4400-$4B7F` — 30 blocks of 64 bytes each — selected by
+the sprite pointers at `$43F8-$43FF`. A pointer value of `$10` addresses
+`$4400`, `$16` addresses `$4580`, etc. (`address = $4000 + pointer * 64`).
+
+### Block map
+
+| Block | Sprite | Source | Notes |
+|-------|--------|--------|-------|
+| `$10-$14` | Chopper / helicopter (5 frames) | `CHOP_SHAPE` | multicolor |
+| `$15-$16` | Plane (2 frames) | `PLN_SHAPE` | `$15` faces left, `$16` faces right |
+| `$17-$1B` | Smart bomb (5 frames) | `GUN_SHAPE` | multicolor |
+| `$1C-$21` | Sun (6 frames) | `SUN_TABLE` | hi-res |
+| `$22` | unused | — | |
+| `$23` | Buck / treasure | sprite 5 pointer | |
+| `$24` | Cloud | sprite 3 pointer | hi-res |
+| `$25-$2A` | Prize / treasure (6 frames) | `PRIZE_SHAPE` | |
+| `$2B-$2C` | unused | — | |
+| `$2D` | "gun bullet" (sprite 6) | sprite 6 pointer | vestigial — see below |
+
+`INIT_GAME` (`CHOPCOD4.ASM`) assigns the sprite pointers:
+sprite 0 = chopper `$12`, 1 = plane `$16`, 2 = smart bomb `$17`,
+3 = cloud `$24`, 4 = sun `$1C`, 5 = buck `$23`, 6 = bullet `$2D`.
+
+### Sprite hardware settings
+
+- `SPRITE_MULTI_COLOR` (`$D01C`) = `$67` → sprites 0, 1, 2, 5, 6 are
+  multicolor (2 bits/pixel, 12 px wide); sprites 3 (cloud) and 4 (sun) are
+  hi-res (1 bit/pixel, 24 px wide).
+- `SPRITE_MCOLOR_0` (`$D025`) = black, `SPRITE_MCOLOR_1` (`$D026`) = white.
+- `SPRITE_ENABLE` (`$D015`) = `$FF` (all eight enabled).
+- Multicolor bit pairs: `00` = transparent, `01` = MCOLOR_0 (black),
+  `10` = sprite's own color, `11` = MCOLOR_1 (white).
+
+### The rotor blade is drawn at runtime
+
+The chopper's rotor is not stored in `SPRITES.ASM`. `DO_BLADES` (`IRQ.ASM`)
+copies 6 bytes from `BLADE_SHAPE` (a 60-byte table of 10 rotations, indexed
+by `BLADE_TABLE`) into bytes 9–14 of each chopper block (`$10-$14`) every
+animation tick. In `SPRITES.ASM` those bytes are `$00` (static state); the
+rotor only appears while the game is running.
+
+### Block `$2D` is vestigial
+
+`INIT_GAME` points sprite 6 at block `$2D` and labels it "GUN BULLET", but
+the real bullet is drawn as bitmap pixels via `BOMB_SHAPE` (`GUNCOD3.ASM` /
+`BOMB.ASM`) and is never rendered as a sprite. Block `$2D` duplicates block
+`$2B` and is effectively dead data.
+
+### Re-extracting sprite data (classic mistakes to avoid)
+
+- A C64 sprite is 21 rows × 3 bytes = 63 bytes; the 64th byte of each block
+  is unused padding (often non-zero in the original dump).
+- VICE's monitor `save` prepends a 2-byte load-address header. Strip those
+  two bytes before treating the rest as data, or every block shifts by 2
+  bytes and all sprites render corrupted.
+- `SPRITES.ASM` was verified byte-exact against the original
+  "(1984)(Imagic)" crack from two independent sources (the `.prg` and the
+  `.t64`).
+
 ## Debugging and Code Corrections
 
 The initial analysis of the code revealed several critical bugs that prevented the game from running correctly, resulting in a black screen on startup. The following section details the bugs that were found and the corrections that were applied to make the game runnable.
@@ -345,18 +407,43 @@ To fix this, I will modify the `PRINT_MACRO` to store the correct return address
 
 
 
+### 7. `.word` vs `.byte` data tables (`CHOPEQU.ASM`)
+
+**Problem:** Several 1-byte data tables were ported to 64tass using `.word`
+instead of `.byte`. Each entry emitted two little-endian bytes, doubling the
+table size, shifting every following label, and corrupting the data (the
+shape tables and the low/high pointer pairs `BUSH_LO/HI`, `SCR_LO/HI`,
+`ATT_LO/HI`).
+
+**Fix:** Changed them all to `.byte` (and to `.byte <X` / `.byte >X` for the
+pointer pairs). This is the single most common trap when porting `.DA#`
+tables from the original Merlin source.
+
+### 8. Sprite table 2-byte misalignment (`SPRITES.ASM`)
+
+**Problem:** The sprite data was originally captured from a VICE monitor
+`save` without stripping the 2-byte load-address header. The header bytes
+(`00 44`) were treated as the first two bytes of sprite block `$10`,
+shifting every block by 2 bytes; every sprite (plane, sun, chopper) rendered
+as sparse garbage.
+
+**Fix:** Re-dumped `$4400-$4B7F` from the running crack, stripped the header,
+and regenerated `SPRITES.ASM`. Verified 0 differing bytes against the live
+dump after zeroing the six runtime rotor bytes in each chopper block.
+
 ## Conclusion
 
 The Chopper Hunt code is a great example of how games were developed for the Commodore 64. It demonstrates the techniques used to create engaging gameplay, graphics, and sound on a system with limited resources. The debugging process also highlights the challenges of low-level programming and the importance of careful memory management and hardware configuration.
 
 
 Program start: $0800
-Program space: $0800-$3FFF
-Screen memory: $4000-$4400
-Sprite memory: $4400-$5800
-Character set: $5800-$6000
-Hires graphics: $6000-$8000
-Color memory: $D800-$DC00
+Program space: $0801-$3EC3
+Screen RAM: $4000-$43E7 (40 x 25)
+Sprite pointers: $43F8-$43FF
+Sprite data: $4400-$4B7F (30 blocks x 64 bytes)
+Character set: $5800-$6000 (text mode only)
+Hires bitmap: $6000-$8000 (8 KB)
+Color memory: $D800-$DBFF
 Variables: $0400-$0800
 
 Key Observations
