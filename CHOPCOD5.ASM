@@ -400,7 +400,7 @@ DO_MOUNT LDA INILVL
 ;--------------------------------
 	 LDA BUSH_LO  ;STORE ADDRESS
 	 STA TEMP3    ;OF MOUNTAIN
-	 LDA BUSH_HI  ;TABLE
+	 LDA BUSH_LO+1  ;TABLE
 	 STA TEMP4
 	 LDY #$00
 _2	 LDA (TEMP3),Y
@@ -433,7 +433,7 @@ DO_COLOR LDA BILEVL
 	 STA TEMP1
 	 LDA SCR_LO
 	 STA TEMP3
-	 LDA SCR_HI
+	 LDA SCR_LO+1
 	 STA TEMP4
 ;--------------------------------
 	 LDY #$00
