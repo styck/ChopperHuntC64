@@ -55,7 +55,9 @@ never needs manual updating.
 
 ## Notes
 
-- The project originally used the Merlin assembler (`.OR`, `.HS`, `.BS`,
-  `.DUMMY`). It was converted to 64tass; the zero-page and variable
-  declarations are now `.virtual` blocks so they do not emit data.
+- The project was originally written on an Apple II with the **S-C Macro
+  Assembler**, identified from the listing's syntax (`/` high-byte operator,
+  `>` macro calls, `:1` local labels, periods in labels, `*` comments).
+  It was converted to 64tass; the zero-page and variable declarations are
+  now `.virtual` blocks so they do not emit data.
 - `CHOPHUNT.prg`, `listing.txt` and `labels.txt` are build outputs.

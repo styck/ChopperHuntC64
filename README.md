@@ -280,10 +280,14 @@ the real bullet is drawn as bitmap pixels via `BOMB_SHAPE` (`GUNCOD3.ASM` /
 
 ## Debugging and Code Corrections
 
-The game was reconstructed from a Merlin cross-assembler listing (with
-opcodes) and a cracked `.prg`/`.t64`, then ported to 64tass. The bugs below
-were found and fixed during that process. Collision detection and the core
-game logic are byte-faithful to the original.
+The game was reconstructed from an Apple II **S-C Macro Assembler** listing
+(with opcodes) and a cracked `.prg`/`.t64`, then ported to 64tass. The
+listing's syntax — the `/` high-byte operator (`.DA /IRQ2`), `>` macro calls
+(`>ADD`, `>INC`), `:1`-style local labels, periods in labels
+(`COLOR.MEMORY`), and `*` comments — identifies S-C Macro Assembler as the
+original development tool. The bugs below were found and fixed during that
+process. Collision detection and the core game logic are byte-faithful to
+the original.
 
 ### 1. Lost 16-bit pointer increments
 
@@ -324,7 +328,7 @@ shape tables and the low/high pointer pairs `BUSH_LO/HI`, `SCR_LO/HI`,
 
 **Fix:** Changed them all to `.byte` (and to `.byte <X` / `.byte >X` for the
 pointer pairs). This is the single most common trap when porting `.DA#`
-tables from the original Merlin source.
+tables from the original S-C Macro Assembler source.
 
 ### 5. Sprite table 2-byte misalignment (`SPRITES.ASM`)
 
