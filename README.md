@@ -2,6 +2,8 @@
 
 The provided assembly code is for the Commodore 64 game 'Chopper Hunt'. The code is written in 64tass assembler syntax. This document provides a detailed analysis of the code for educational purposes, explaining the game's logic, hardware interactions, and overall structure, with a focus on Commodore 64-specific programming techniques.
 
+Assembled with **64tass v1.60.3243** (r3243, 2025-05-10) — <https://sourceforge.net/projects/tass64/> (source: <https://github.com/soci64/tass64>).
+
 ## Game Overview
 
 Chopper Hunt is an action game where the player controls a helicopter. Each level the player must collect the three treasure bags ("bucks") and drop them off on the landing pad to advance. Dirt and rock fall from above, and the chopper can dig through the terrain with bombs and a gun, but hitting the mountains, water, or falling debris crashes it. Levels get harder as the game progresses.

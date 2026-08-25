@@ -8,6 +8,8 @@
 | VICE (emulator) | `C:\Users\styck\AppData\Local\Microsoft\WinGet\Packages\VICE-Team.VICE.GTK3_Microsoft.Winget.Source_8wekyb3d8bbwe\GTK3VICE-3.10-win64\bin\x64sc.exe` |
 | RetroDebugger | `C:\Users\styck\tools\RetroDebugger\RetroDebugger-v1.0.0\RetroDebugger-notsigned.exe` |
 
+64tass: <https://sourceforge.net/projects/tass64/> (source: <https://github.com/soci64/tass64>)
+
 ## Build & Run
 
 Use the VS Code tasks (Ctrl+Shift+B to build, or the Run task):
