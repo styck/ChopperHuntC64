@@ -4,9 +4,35 @@ The provided assembly code is for the Commodore 64 game 'Chopper Hunt'. The code
 
 Assembled with **64tass v1.60.3243** (r3243, 2025-05-10) — <https://sourceforge.net/projects/tass64/> (source: <https://github.com/soci64/tass64>).
 
+## Disclaimer
+
+> This source code is published strictly for historical preservation,
+> education, and research purposes. If you are the rightful copyright holder
+> of this code and object to its archival, please contact me and it will be
+> removed immediately.
+
 ## Game Overview
 
 Chopper Hunt is an action game where the player controls a helicopter. Each level the player must collect the three treasure bags ("bucks") and drop them off on the landing pad to advance. Dirt and rock fall from above, and the chopper can dig through the terrain with bombs and a gun, but hitting the mountains, water, or falling debris crashes it. Levels get harder as the game progresses.
+
+## Historical Note
+
+*Chopper Hunt* is a 1984 Commodore 64 side-view shoot-'em-up published by
+Imagic. It is a rework of the 1982 Atari 8-bit game *Buried Buck$* (Buried
+Bucks), which introduced the core loop: bomb the ground to dig holes, uncover
+hidden treasure, and carry it back to base before falling dirt traps you.
+
+The C64 version upgraded the presentation — rolling mountains, clouds, and a
+sun — replaced the enemy bomber with a fighter jet, and added per-level
+treasure variety (oil barrels on level 1, money bags on level 2, uranium on
+later levels). The chopper carries only one treasure at a time and drops it
+if destroyed before returning to base. Later levels have taller terrain,
+less open sky, and faster hazards.
+
+Released near the end of Imagic's life, the game is remembered as a polished,
+colorful take on a simple but addictive dig-and-return mechanic. The original
+source credits the game to "Applied Computer Technology"
+(`BY APPLIED COMPUTER TECHNOLOGY`, 1984).
 
 ## Code Structure
 
