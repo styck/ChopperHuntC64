@@ -34,6 +34,33 @@ colorful take on a simple but addictive dig-and-return mechanic. The original
 source credits the game to "Applied Computer Technology"
 (`BY APPLIED COMPUTER TECHNOLOGY`, 1984).
 
+## Easter Egg — Dedication Screen
+
+The game contains a hidden dedication to the developer's daughter, Nichelle.
+On the 1-player game-over screen the normal "CHOPPER HUNT / IMAGIC /
+COPYRIGHT 1984" credits are replaced with:
+
+    7 SEPTEMBER 1984
+    TO MY DAUGHTER,
+  < NICHELLE  STYCK >
+
+The text lives in `CHOPEQU.ASM` (`NAME`, `NAME2`, `NAME3`) and is printed by
+`GAMEOVER.ASM` when `NAME_FLAG` is set.
+
+**Trigger** (from `MAIN_LOOP` in `CHOPCOD1.ASM`): press **SPACE** while all
+of the following are true:
+
+1. **On a diamond level** — the treasure sprite is `$29`
+   (`PRIZE_1 == $29`; the code comment reads "ON THE DIAMONDS?"). This is
+   level 5 and every 8th level after (13, 21, 29, …).
+2. **Below ground level** — dug down into the dirt
+   (`CHOP_Y - $2E >= INILVL`).
+3. **Facing right** (`BODPH == 4`).
+
+Pressing SPACE arms `NAME_FLAG` (and toggles pause, as usual). Then lose
+your last life to see the dedication. It does not appear in 2-player games —
+`GAMEOVER.ASM` only checks `NAME_FLAG` when `PLAYRS == 0`.
+
 ## Code Structure
 
 The code is modular, with different functionalities separated into multiple `.ASM` files. The main file, `CHOPHUNT.ASM`, includes all other files to assemble the final program. The code is well-commented, which aids in understanding the logic.
