@@ -285,7 +285,7 @@ Full memory map of the reconstructed game:
 | Region | Range |
 | --- | --- |
 | Variables | `$0400-$0562` |
-| Program (BASIC stub + code/data) | `$0801-$3DB2` |
+| Program (BASIC stub + code/data) | `$0801-$3EBF` |
 | Screen RAM | `$4000-$43E7` |
 | Sprite pointers | `$43F8-$43FF` |
 | Sprite data | `$4400-$4B7F` |

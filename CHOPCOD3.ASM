@@ -87,13 +87,48 @@ _2	 	 LDA BHPO      ;LET IRQ PUT
 ;  PICKED UP BUCKS?
 ;--------------------------------
 BUCK_CHECK LDA FERRY           ;CARRYING $'S?
-		 BNE DONE_CK
-		 LDA DEAD      ;DEAD
-		 BNE DONE_CK   ;YES
-		 LDA LANDFG    ;LANDED
-		 BNE DONE_CK   ;YES
-		 LDA CHOP_EXPL ;CHOPPER EXPLODING
-		 BNE DONE_CK   ;YES
+		 ORA DEAD      ;DEAD
+		 ORA LANDFG    ;LANDED
+		 ORA CHOP_EXPL ;CHOPPER EXPLODING
+		 BEQ _pk       ;ALL CLEAR - CHECK PICKUP
+		 JMP DONE_CK   ;SKIP PICKUP
+_pk
+;--------------------------------
+; SOFTWARE OVERLAP CHECK (PRIMARY)
+;--------------------------------
+		 LDX #$02
+_sw_lp
+		 LDA SHOB1,X     ;BUCK ON SCREEN?
+		 BEQ _sw_nx      ;NO
+		 LDA CHOP_XMSB   ;SAME SCREEN HALF?
+		 CMP BUC1_XMSB,X
+		 BNE _sw_nx
+		 LDA CHOP_X      ;X OVERLAP?
+		 SEC
+		 SBC BUC1_X,X
+		 CMP #18
+		 BCC _sw_y
+		 CMP #$EF
+		 BCS _sw_y
+		 JMP _sw_nx
+_sw_y
+		 LDA CHOP_Y      ;Y OVERLAP?
+		 SEC
+		 SBC BUC1_Y,X
+		 CMP #19
+		 BCC _sw_pk
+		 CMP #$EE
+		 BCS _sw_pk
+		 JMP _sw_nx
+_sw_pk
+		 STX FERIX       ;CARRYING THIS BUCK
+		 JMP _3
+_sw_nx
+		 DEX
+		 BPL _sw_lp
+;--------------------------------
+; HARDWARE COLLISION (FALLBACK)
+;--------------------------------
 		 LDA SPRITE_COLLISION
 		 AND #$38      ;CHOP AND BUCK COLLISIONS ONLY
 		 BEQ DONE_CK   ;NO COLLISIONS

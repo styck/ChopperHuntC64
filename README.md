@@ -395,6 +395,26 @@ as sparse garbage.
 and regenerated `SPRITES.ASM`. Verified 0 differing bytes against the live
 dump after zeroing the six runtime rotor bytes in each chopper block.
 
+### 6. Buck pickup — software collision fallback (`CHOPCOD3.ASM`)
+
+**Problem:** Buck pickup relied solely on the VIC sprite-to-sprite collision
+register (`$D01E`), sampled once per frame while the buck sprites are
+multiplexed across the raster split. A bag disturbed at the wrong moment
+(or two bags dropped at the same spot) could be left visible but never
+detected, blocking level completion.
+
+**Fix:** `BUCK_CHECK` now checks each on-screen buck's position directly
+against the chopper first (a software overlap test using the chopper's
+visible footprint, ~18x19 pixels), and only falls back to the original
+hardware register if nothing overlaps. Any bag the chopper visually touches
+is collected. This is a post-restoration fix; the original 1984 pickup logic
+was byte-faithful and carried this bug.
+
+The chopper carries only one bag at a time; while carrying, other bags are
+ignored. If the chopper crashes while carrying, that bag is dropped back at
+the crash spot (intended behavior). This can leave two bags near each other,
+but both remain collectible — one trip each.
+
 ## Conclusion
 
 The Chopper Hunt code is a great example of how games were developed for the Commodore 64. It demonstrates the techniques used to create engaging gameplay, graphics, and sound on a system with limited resources. The debugging process also highlights the challenges of low-level programming and the importance of careful memory management and hardware configuration.
@@ -405,7 +425,7 @@ The Chopper Hunt code is a great example of how games were developed for the Com
 | Region | Range | Notes |
 | --- | --- | --- |
 | Variables | `$0400-$0562` | Game-state workspace |
-| Program (BASIC `SYS` stub + code/data) | `$0801-$3DB2` | Loaded and run from `$0801` |
+| Program (BASIC `SYS` stub + code/data) | `$0801-$3EBF` | Loaded and run from `$0801` |
 | Screen RAM | `$4000-$43E7` | 40 x 25 text screen |
 | Sprite pointers | `$43F8-$43FF` | 8 bytes |
 | Sprite data | `$4400-$4B7F` | 30 sprites x 64 bytes |
