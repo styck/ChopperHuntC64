@@ -425,8 +425,8 @@ MAIN_LOOP:
     EOR #$01
     STA PAUSE
 ;--------------------------------
-    LDA PRIZE_1
-    CMP #$29	;ON THE DIAMONDS?
+    LDA BILEVL
+    CMP #$00	;ON THE FIRST LEVEL?
     BNE debounce_spacebar	;NO
     LDA CHOP_Y
     SEC
