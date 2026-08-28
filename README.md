@@ -434,6 +434,6 @@ The Chopper Hunt code is a great example of how games were developed for the Com
 
 ## Screenshots
 
-<img src="ScreenShots.png" alt="Chopper Hunt screenshots" />
+<img src="screenshots/ScreenShots.png" alt="Chopper Hunt screenshots" />
 
-<img src="EasterEgg.png" alt="Chopper Hunt dedication screen" />
+<img src="screenshots/EasterEgg.png" alt="Chopper Hunt dedication screen" />
