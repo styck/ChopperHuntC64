@@ -92,14 +92,15 @@ COORD2 .byte 0,255,0,1,0,255,1,255,1,2,254,0
        .byte 255,1,3,3,255,2,2,254,254,0,3,0,253
 
 ;*--------------------------------
-PAD_DATA .byte $55,$55,$AA,$F0,$0F,$F0,$0F,$0
-         .byte $0F,$AA,$AA,$F0,$0F,$F0,$0F,$0
+PAD_DATA .byte $55,$55,$AA,$F0,$0F,$F0,$0F,$F0
+         .byte $0F,$AA,$AA,$F0,$0F,$F0,$0F,$F0
          .byte $0F,$AA,$AA,$FF,$FF,$FF,$FF,$FF
 
 ;*--------------------------------
 PAD_COLOR .byte $07,$07		 ; YELLOW
 ;*--------------------------------
-PADC_ADR  .byte $E1,$D9
+PADC_ADR  .byte $59,$DA
+          .byte $E1,$D9
           .byte $69,$D9
           .byte $F1,$D8
 
@@ -158,20 +159,20 @@ EOFS     .byte 40, 80, 120, 120, 80, 40
 EOFHT    .byte 2, 4, 6, 6, 4, 2
 DIRT_COLUMN .byte 00
 ;*--------------------------------
-BHPO	 .byte 0,0,0,0,0,0
-BHPO_XMSB  .byte 0,0,0,0,0,0
+BHPO	 .byte 0,0,0
+BHPO_XMSB  .byte 0,0,0
 ;*--------------------------------
-B2HPO	 .byte 0,0,0,0,0,0
-B2HPO_XMSB .byte 0,0,0,0,0,0
+B2HPO	 .byte 0,0,0
+B2HPO_XMSB .byte 0,0,0
 ;*--------------------------------
 BOFS	 .byte 56,106,156
 BNUMBER	 .byte 00
-COLIX	 .byte 0,0,0,1,0,0,0,2,0,0,0,1,0,0
-SCOOFS	 .byte 0,0,0,1,0,2,0,3,0,5,0,6,0,7
-P1LINI	 .byte 3,3,0,3	; player 1 lives: index 0 = one player, 1 = two players
-P2LINI	 .byte 0,3,0,3	; player 2 lives: index 0 = one player, 1 = two players
-LIFE1	 .byte 0,0,0,0
-LIFE2	 .byte 0,0,0,0
+COLIX	 .byte 0,0,1,0,2,0,1,0	; .HS 0000010002000100
+SCOOFS	 .byte 0,0,1,2,3,5,6,7	; .HS 0000010203050607
+P1LINI	 .byte 3,3	; .HS 0303 - player 1 lives: index 0 = one player, 1 = two players
+P2LINI	 .byte 0,3	; .HS 0003 - player 2 lives
+LIFE1	 .byte 0,0
+LIFE2	 .byte 0,0
 PLOTBL	 .byte $C0,$30,$0C,$03
 BUCKSN	 .byte $38,$6C,$44,$F6,$C6,$DE,$44,$6C,$38,$54
 BUSH_LO	 .byte <BUSH
