@@ -414,6 +414,18 @@ ignored. If the chopper crashes while carrying, that bag is dropped back at
 the crash spot (intended behavior). This can leave two bags near each other,
 but both remain collectible — one trip each.
 
+### 7. Buck "infinite loot" / ghost buck (`CHOPCOD3.ASM`)
+
+**Problem:** `CLEAR_B1/B2/B3` hid a picked-up buck by moving it to `X=0`,
+`Y=$10/$40/$70`. From level 2 onward the raster split rises above `$70` (and
+above `$40` on level 4), so the "cleared" buck was still drawn at the left
+edge and could be picked up again — looting the same treasure for points
+repeatedly.
+
+**Fix:** Cleared bucks now move to `Y=$00` (always above the raster split),
+and the hardware-collision fallback in `BUCK_CHECK` also checks `SHOB1/2/3`
+so a cleared (off-screen) buck can never be collected again.
+
 ## Conclusion
 
 The Chopper Hunt code is a great example of how games were developed for the Commodore 64. It demonstrates the techniques used to create engaging gameplay, graphics, and sound on a system with limited resources. The debugging process also highlights the challenges of low-level programming and the importance of careful memory management and hardware configuration.
@@ -431,6 +443,10 @@ The Chopper Hunt code is a great example of how games were developed for the Com
 | Character set | `$5800-$6000` | 2 KB wide font (text band) |
 | Hires bitmap | `$6000-$7FFF` | 8 KB |
 | Color memory | `$D800-$DBFF` | 1 KB color RAM |
+
+## Original Instructions
+
+<img src="screenshots/ChopperHunInstructions.png" alt="Chopper Hunt original instructions" />
 
 ## Screenshots
 
