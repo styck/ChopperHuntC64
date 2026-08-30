@@ -4,6 +4,54 @@ The provided assembly code is for the Commodore 64 game 'Chopper Hunt'. The code
 
 Assembled with **64tass v1.60.3243** (r3243, 2025-05-10) — <https://sourceforge.net/projects/tass64/> (source: <https://github.com/soci64/tass64>).
 
+## Play it now — no programming needed
+
+You don't have to assemble or build anything. A ready-to-run game file is
+already included in this repository:
+
+- **`CHOPHUNT.prg`** — the finished game, in Commodore 64 program-file
+  format (like an `.exe` is for Windows).
+
+### 1. Get a free Commodore 64 emulator
+
+The game runs inside a free emulator called **VICE**:
+
+- Official downloads for Windows, macOS, and Linux:
+  <https://vice-emu.sourceforge.io/>
+
+### 2. Download the game
+
+Grab the pre-built file straight from this repository:
+
+- **[Download CHOPHUNT.prg](https://github.com/styck/ChopperHuntC64/raw/main/CHOPHUNT.prg)**
+
+### 3. Run it
+
+Open VICE, then **drag and drop `CHOPHUNT.prg` onto the emulator window**
+(or use **File → Autostart image…** and pick the file).
+
+The game loads and starts on its own. That's it.
+
+### Controls
+
+| When | Action |
+| --- | --- |
+| Title screen | **F3** — switch 1 / 2 players · **F1** — switch 1 / 2 joysticks |
+| Title screen | **F7** or **fire button** — start the game |
+| Playing | **Joystick** — fly the helicopter |
+| Playing | **Fire button** — drop a bomb |
+| Playing | **Space** — pause |
+| Playing | **F7** — restart · **F5** — back to the title screen |
+
+> VICE emulates the joystick with the keyboard by default. Use
+> **Settings → Joystick** in VICE to see the current keys or to connect a
+> real controller.
+
+---
+
+*(Everything below is for developers and restorers — you can stop reading
+here if you only wanted to play the game.)*
+
 ## Disclaimer
 
 > This source code is published strictly for historical preservation,
